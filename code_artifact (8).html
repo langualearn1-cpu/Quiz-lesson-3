@@ -1,0 +1,2492 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>الاختبار التفاعلي للغة الإنجليزية | Interactive English Quiz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --secondary: #0ea5e9;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #f59e0b;
+    }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: linear-gradient(135deg, #eef2ff 0%, #f0f9ff 50%, #fdf4ff 100%);
+      min-height: 100vh;
+      user-select: none;
+    }
+    .en-font {
+      font-family: 'Fredoka', sans-serif;
+      direction: ltr;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Word Bank & Dropzones */
+    .word-chip {
+      cursor: grab;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .word-chip:hover {
+      transform: translateY(-2px);
+    }
+    .word-chip:active {
+      cursor: grabbing;
+    }
+    .word-chip.selected-chip {
+      transform: scale(1.08);
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.35);
+      background: #4f46e5 !important;
+      color: white !important;
+      border-color: #4338ca !important;
+    }
+    .drop-zone {
+      min-height: 48px;
+      transition: all 0.2s ease;
+    }
+    .drop-zone.drag-over {
+      background-color: #e0f2fe !important;
+      border-color: #0284c7 !important;
+      transform: scale(1.03);
+    }
+
+    /* Double-lined handwriting style from worksheet */
+    .handwriting-lines {
+      border-top: 2px solid #94a3b8;
+      border-bottom: 2px solid #94a3b8;
+      position: relative;
+    }
+    .handwriting-lines::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      border-top: 1px dashed #cbd5e1;
+      pointer-events: none;
+    }
+
+    /* Circle the correct word style (Question 3) */
+    .circle-option {
+      position: relative;
+      padding: 6px 22px;
+      border-radius: 9999px;
+      border: 3px solid transparent;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .circle-option:hover {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+    .circle-option.circled {
+      border-color: #2563eb;
+      background-color: #eff6ff;
+      color: #1d4ed8;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+      transform: scale(1.05);
+    }
+    .circle-option.circled-correct {
+      border-color: #16a34a !important;
+      background-color: #dcfce7 !important;
+      color: #15803d !important;
+      box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.2) !important;
+    }
+    .circle-option.circled-wrong {
+      border-color: #dc2626 !important;
+      background-color: #fee2e2 !important;
+      color: #b91c1c !important;
+      box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.2) !important;
+    }
+
+    /* Confetti Canvas */
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: #ffffff !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-only {
+        display: block !important;
+      }
+      .print-card {
+        box-shadow: none !important;
+        border: 2px solid #cbd5e1 !important;
+      }
+    }
+  </style>
+</head>
+<body class="text-slate-800 pb-16">
+
+  <!-- Confetti Canvas for Celebration -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Top Header -->
+  <header class="bg-white/90 backdrop-blur-md border-b border-indigo-100 sticky top-0 z-40 shadow-sm no-print">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 to-sky-500 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-xl md:text-2xl font-black text-indigo-950">الاختبار التفاعلي للغة الإنجليزية</h1>
+          <p class="text-xs md:text-sm text-slate-500 font-semibold">الأعداد الترتيبية (1st - 20th) • حوط الكلمة الصحيحة • الصفات تحت الصور • إكمال الجمل بالسحب والإفلات</p>
+        </div>
+      </div>
+
+      <!-- Student Info & Controls -->
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="flex items-center bg-slate-100 rounded-xl px-3 py-1.5 border border-slate-200">
+          <span class="text-xs font-bold text-slate-500 ml-2">اسم الطالب/ـة:</span>
+          <input id="student-name" type="text" placeholder="اكتب اسمك هنا..." class="bg-transparent text-sm font-bold text-indigo-950 focus:outline-none w-36 md:w-44" />
+        </div>
+
+        <button id="sound-toggle" onclick="toggleSound()" class="p-2.5 rounded-xl bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition font-bold text-sm flex items-center gap-1.5" title="تشغيل/كتم المؤثرات الصوتية">
+          <span id="sound-icon">🔊</span>
+          <span class="hidden sm:inline">الصوت</span>
+        </button>
+
+        <button onclick="finishExam()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm shadow-md shadow-emerald-200 transition flex items-center gap-2">
+          <span>إنهاء الاختبار وعرض النتيجة</span>
+          <span>🏆</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="max-w-7xl mx-auto px-4 mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6 no-print">
+
+    <!-- Questions Board Sidebar (لوحة الأسئلة) -->
+    <aside class="lg:col-span-3 space-y-4">
+      <div class="bg-white rounded-3xl p-5 shadow-lg shadow-indigo-100/60 border border-indigo-50 sticky top-24">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+          <h2 class="font-extrabold text-lg text-indigo-950 flex items-center gap-2">
+            <span>📋</span>
+            <span>لوحة الأسئلة</span>
+          </h2>
+          <span id="overall-progress-badge" class="text-xs font-extrabold px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-700">0 / 43</span>
+        </div>
+
+        <!-- Overall Progress Bar -->
+        <div class="mb-5">
+          <div class="flex justify-between text-xs font-bold text-slate-500 mb-1.5">
+            <span>نسبة الإنجاز الكلية</span>
+            <span id="overall-progress-pct">0%</span>
+          </div>
+          <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+            <div id="overall-progress-bar" class="h-full bg-gradient-to-r from-indigo-600 to-sky-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Navigation Buttons for the 5 Questions -->
+        <div class="space-y-2.5" id="question-nav-list">
+          <!-- Dynamically updated -->
+        </div>
+
+        <!-- View Mode Toggle -->
+        <div class="mt-5 pt-4 border-t border-slate-100 space-y-2.5">
+          <button onclick="checkCurrentQuestion()" class="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm shadow-sm transition flex items-center justify-center gap-2">
+            <span>✨</span>
+            <span>تحقق من إجابات هذا السؤال</span>
+          </button>
+          <button onclick="toggleShowAllQuestions()" id="view-mode-btn" class="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition flex items-center justify-center gap-2">
+            <span>📑</span>
+            <span id="view-mode-text">عرض جميع الأسئلة معاً</span>
+          </button>
+          <button onclick="resetAllExam()" class="w-full py-2 px-4 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 font-bold text-xs transition flex items-center justify-center gap-1.5">
+            <span>🔄</span>
+            <span>إعادة تعيين الاختبار بالكامل</span>
+          </button>
+        </div>
+
+        <!-- Live Score Box (Shown after checking or finishing) -->
+        <div id="sidebar-result-card" class="hidden mt-5 pt-4 border-t border-slate-100 bg-gradient-to-br from-indigo-50 to-sky-50 rounded-2xl p-4 border border-indigo-100 text-center">
+          <p class="text-xs font-bold text-indigo-600 mb-1">نتيجة الاختبار النهائية</p>
+          <div class="text-3xl font-black text-indigo-950 mb-1" id="sidebar-score-text">43 / 43</div>
+          <div class="text-sm font-extrabold text-emerald-600 mb-3" id="sidebar-pct-text">100% - ممتاز!</div>
+          <button onclick="openResultsModal()" class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow transition mb-2">
+            📊 عرض التقرير والتغذية الراجعة
+          </button>
+          <button onclick="printExamResult()" class="w-full py-2 rounded-xl bg-white hover:bg-slate-50 text-indigo-700 border border-indigo-200 font-bold text-xs transition">
+            🖨️ طباعة النتيجة والشهادة
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Questions Content Area -->
+    <main class="lg:col-span-9 space-y-8">
+
+      <!-- ==========================================
+           QUESTION 1: ORDINAL NUMBERS 1ST - 12TH (12 ITEMS)
+           ========================================== -->
+      <section id="q-section-1" class="bg-white rounded-3xl shadow-xl shadow-indigo-100/50 border border-indigo-50 overflow-hidden">
+        <!-- Question Header -->
+        <div class="bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-4 text-white flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center font-black text-lg">1</span>
+            <div>
+              <h2 class="text-lg md:text-xl font-black">السؤال الأول: ضع الكلمة تحت الصورة المناسبة (1st - 12th)</h2>
+              <p class="text-xs md:text-sm text-indigo-100 font-semibold en-font">Ordinal numbers: Look at the numbers and write the words in the correct place</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="clearQ1()" class="px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition">
+              إعادة الكلمات 🗑️
+            </button>
+            <span id="q1-badge" class="px-3 py-1.5 rounded-lg bg-white text-indigo-700 font-black text-xs">0 / 12</span>
+          </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="bg-indigo-50/70 px-6 py-3 border-b border-indigo-100 flex flex-wrap items-center justify-between gap-2 text-xs md:text-sm text-indigo-950 font-semibold">
+          <div class="flex items-center gap-2">
+            <span>👆</span>
+            <span><strong>طريقة الحل:</strong> اسحب الكلمة من الصندوق وأفلتها في المستطيل تحت الرقم المناسب، أو اضغط على الكلمة ثم اضغط على المستطيل.</span>
+          </div>
+          <span class="text-indigo-600 font-bold">🔊 اضغط على الكلمة أو السماعة لسماع النطق</span>
+        </div>
+
+        <!-- Question 1 Feedback Banner -->
+        <div id="q1-feedback" class="hidden mx-6 mt-4 p-4 rounded-2xl border text-sm font-bold"></div>
+
+        <!-- Worksheet Content -->
+        <div class="p-6 md:p-8" dir="ltr">
+          <div class="text-center mb-6">
+            <h3 class="en-font text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Ordinal numbers</h3>
+            <p class="en-font text-sm md:text-base font-bold text-slate-600 mt-1">Look at the numbers and write the words in the correct place</p>
+          </div>
+
+          <!-- Word Box -->
+          <div class="max-w-4xl mx-auto mb-8 p-5 border-2 border-slate-800 rounded-xl bg-white shadow-sm">
+            <div id="q1-word-bank" class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- 12 Numbers Grid (3 columns x 4 rows matching worksheet) -->
+          <div id="q1-grid" class="grid grid-cols-2 sm:grid-cols-3 border-2 border-slate-800 rounded-xl overflow-hidden max-w-4xl mx-auto bg-white">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Question Footer Navigation -->
+        <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex items-center justify-between">
+          <button onclick="checkQuestion(1)" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm shadow transition flex items-center gap-2">
+            <span>تحقق من السؤال الأول</span>
+            <span>✔️</span>
+          </button>
+          <button onclick="goToQuestion(2)" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow transition flex items-center gap-2">
+            <span>السؤال التالي (الأعداد 13th - 20th)</span>
+            <span>⬅️</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           QUESTION 2: ORDINAL NUMBERS 13TH - 20TH (8 ITEMS)
+           ========================================== -->
+      <section id="q-section-2" class="bg-white rounded-3xl shadow-xl shadow-indigo-100/50 border border-indigo-50 overflow-hidden hidden">
+        <!-- Question Header -->
+        <div class="bg-gradient-to-r from-sky-600 to-indigo-600 px-6 py-4 text-white flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center font-black text-lg">2</span>
+            <div>
+              <h2 class="text-lg md:text-xl font-black">السؤال الثاني: ضع الكلمة تحت الصورة المناسبة (13th - 20th)</h2>
+              <p class="text-xs md:text-sm text-sky-100 font-semibold en-font">Ordinal numbers: Look at the numbers and write the words in the correct place</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="clearQ2()" class="px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition">
+              إعادة الكلمات 🗑️
+            </button>
+            <span id="q2-badge" class="px-3 py-1.5 rounded-lg bg-white text-sky-700 font-black text-xs">0 / 8</span>
+          </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="bg-sky-50/80 px-6 py-3 border-b border-sky-100 flex flex-wrap items-center justify-between gap-2 text-xs md:text-sm text-sky-950 font-semibold">
+          <div class="flex items-center gap-2">
+            <span>👆</span>
+            <span><strong>طريقة الحل:</strong> اسحب الكلمة من الصندوق وأفلتها في المستطيل تحت الرقم المناسب (من 13th إلى 20th)، أو اضغط على الكلمة ثم اضغط على المستطيل.</span>
+          </div>
+          <span class="text-sky-700 font-bold">🔊 اضغط على الكلمة أو السماعة لسماع النطق</span>
+        </div>
+
+        <!-- Question 2 Feedback Banner -->
+        <div id="q2-feedback" class="hidden mx-6 mt-4 p-4 rounded-2xl border text-sm font-bold"></div>
+
+        <!-- Worksheet Content -->
+        <div class="p-6 md:p-8" dir="ltr">
+          <div class="text-center mb-6">
+            <h3 class="en-font text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Ordinal numbers</h3>
+            <p class="en-font text-sm md:text-base font-bold text-slate-600 mt-1">Look at the numbers and write the words in the correct place</p>
+          </div>
+
+          <!-- Word Box -->
+          <div class="max-w-4xl mx-auto mb-8 p-5 border-2 border-slate-800 rounded-xl bg-white shadow-sm">
+            <div id="q2-word-bank" class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- 8 Numbers Grid (3 columns x 3 rows matching worksheet) -->
+          <div id="q2-grid" class="grid grid-cols-2 sm:grid-cols-3 border-2 border-slate-800 rounded-xl overflow-hidden max-w-4xl mx-auto bg-white">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Question Footer Navigation -->
+        <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <button onclick="goToQuestion(1)" class="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-sm transition">
+              ➡️ السؤال السابق
+            </button>
+            <button onclick="checkQuestion(2)" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm shadow transition">
+              تحقق من السؤال الثاني ✔️
+            </button>
+          </div>
+          <button onclick="goToQuestion(3)" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow transition flex items-center gap-2">
+            <span>السؤال التالي (ضع دائرة)</span>
+            <span>⬅️</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           QUESTION 3: CIRCLE THE CORRECT WORDS (9 ITEMS)
+           ========================================== -->
+      <section id="q-section-3" class="bg-white rounded-3xl shadow-xl shadow-indigo-100/50 border border-indigo-50 overflow-hidden hidden">
+        <!-- Question Header -->
+        <div class="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-4 text-white flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center font-black text-lg">3</span>
+            <div>
+              <h2 class="text-lg md:text-xl font-black">السؤال الثالث: ضع دائرة حول الإجابة الصحيحة</h2>
+              <p class="text-xs md:text-sm text-violet-100 font-semibold en-font">Circle the correct words to name the numbers.</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="clearQ3()" class="px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition">
+              مسح الاختيارات 🗑️
+            </button>
+            <span id="q3-badge" class="px-3 py-1.5 rounded-lg bg-white text-violet-700 font-black text-xs">0 / 9</span>
+          </div>
+        </div>
+
+        <!-- Instructions Banner -->
+        <div class="bg-violet-50/70 px-6 py-3 border-b border-violet-100 flex flex-wrap items-center justify-between gap-2 text-xs md:text-sm text-violet-950 font-semibold">
+          <div class="flex items-center gap-2">
+            <span>⭕</span>
+            <span><strong>طريقة الحل:</strong> اضغط على الكلمة الصحيحة التي تطابق الرقم الترتيبي لوضع دائرة حولها.</span>
+          </div>
+          <span class="text-violet-700 font-bold">🔊 اضغط على السماعة للاستماع لنطق الكلمة</span>
+        </div>
+
+        <!-- Question 3 Feedback Banner -->
+        <div id="q3-feedback" class="hidden mx-6 mt-4 p-4 rounded-2xl border text-sm font-bold"></div>
+
+        <!-- Circle Options List -->
+        <div class="p-6 md:p-8" dir="ltr">
+          <h3 class="en-font text-xl md:text-2xl font-bold text-slate-900 mb-6">Circle the correct words to name the numbers.</h3>
+          <div id="q3-rows-container" class="space-y-3.5 max-w-4xl mx-auto">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Question Footer Navigation -->
+        <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <button onclick="goToQuestion(2)" class="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-sm transition">
+              ➡️ السؤال السابق
+            </button>
+            <button onclick="checkQuestion(3)" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm shadow transition">
+              تحقق من السؤال الثالث ✔️
+            </button>
+          </div>
+          <button onclick="goToQuestion(4)" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow transition flex items-center gap-2">
+            <span>السؤال التالي (الصفات تحت الصور)</span>
+            <span>⬅️</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           QUESTION 4: CHOOSE AND WRITE THE CORRECT ANSWER (9 PICTURES)
+           ========================================== -->
+      <section id="q-section-4" class="bg-white rounded-3xl shadow-xl shadow-indigo-100/50 border border-indigo-50 overflow-hidden hidden">
+        <!-- Question Header -->
+        <div class="bg-gradient-to-r from-pink-600 to-rose-600 px-6 py-4 text-white flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center font-black text-lg">4</span>
+            <div>
+              <h2 class="text-lg md:text-xl font-black">السؤال الرابع: ضع الكلمة تحت الصورة المناسبة</h2>
+              <p class="text-xs md:text-sm text-pink-100 font-semibold en-font">Choose and write the correct answer</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="clearQ4()" class="px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition">
+              إعادة الكلمات 🗑️
+            </button>
+            <span id="q4-badge" class="px-3 py-1.5 rounded-lg bg-white text-pink-700 font-black text-xs">0 / 9</span>
+          </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="bg-pink-50/70 px-6 py-3 border-b border-pink-100 flex flex-wrap items-center justify-between gap-2 text-xs md:text-sm text-pink-950 font-semibold">
+          <div class="flex items-center gap-2">
+            <span>🖼️</span>
+            <span><strong>طريقة الحل:</strong> اسحب الكلمة من الصندوق وأفلتها على السطر تحت الصورة المناسبة، أو اضغط على الكلمة ثم اضغط على السطر تحت الصورة.</span>
+          </div>
+          <span class="text-pink-700 font-bold">🔊 اضغط على الكلمة أو السماعة لسماع النطق</span>
+        </div>
+
+        <!-- Question 4 Feedback Banner -->
+        <div id="q4-feedback" class="hidden mx-6 mt-4 p-4 rounded-2xl border text-sm font-bold"></div>
+
+        <!-- Worksheet Content -->
+        <div class="p-6 md:p-8" dir="ltr">
+          <h3 class="en-font text-2xl md:text-3xl font-extrabold text-slate-900 text-center mb-4">Choose and write the correct answer</h3>
+
+          <!-- Word Bank -->
+          <div class="max-w-3xl mx-auto mb-8 p-5 rounded-2xl bg-rose-50/50 border-2 border-rose-200 shadow-sm">
+            <div id="q4-word-bank" class="flex flex-wrap items-center justify-center gap-3">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- 9 Pictures Grid (3x3) -->
+          <div id="q4-pictures-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Question Footer Navigation -->
+        <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <button onclick="goToQuestion(3)" class="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-sm transition">
+              ➡️ السؤال السابق
+            </button>
+            <button onclick="checkQuestion(4)" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm shadow transition">
+              تحقق من السؤال الرابع ✔️
+            </button>
+          </div>
+          <button onclick="goToQuestion(5)" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow transition flex items-center gap-2">
+            <span>السؤال التالي (إكمال الفراغ بالسحب والإفلات)</span>
+            <span>⬅️</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           QUESTION 5: COMPLETE THE SENTENCES WITH DRAG & DROP WORD BOX (5 ITEMS)
+           ========================================== -->
+      <section id="q-section-5" class="bg-white rounded-3xl shadow-xl shadow-indigo-100/50 border border-indigo-50 overflow-hidden hidden">
+        <!-- Question Header -->
+        <div class="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 text-white flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center font-black text-lg">5</span>
+            <div>
+              <h2 class="text-lg md:text-xl font-black">السؤال الخامس: أكمل الفراغ التالي من صندوق الكلمات (سحب وإفلات)</h2>
+              <p class="text-xs md:text-sm text-emerald-100 font-semibold en-font">choose the correct answer.</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="clearQ5()" class="px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition">
+              إعادة الكلمات 🗑️
+            </button>
+            <span id="q5-badge" class="px-3 py-1.5 rounded-lg bg-white text-emerald-700 font-black text-xs">0 / 5</span>
+          </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="bg-emerald-50/70 px-6 py-3 border-b border-emerald-100 flex flex-wrap items-center justify-between gap-2 text-xs md:text-sm text-emerald-950 font-semibold">
+          <div class="flex items-center gap-2">
+            <span>🧲</span>
+            <span><strong>طريقة الحل:</strong> اسحب الكلمة المناسبة من صندوق الكلمات وأفلتها في الفراغ داخل الجملة، أو اضغط على الكلمة ثم اضغط على الفراغ.</span>
+          </div>
+          <span class="text-emerald-700 font-bold">🔊 اضغط على السماعة للاستماع للجملة كاملة</span>
+        </div>
+
+        <!-- Question 5 Feedback Banner -->
+        <div id="q5-feedback" class="hidden mx-6 mt-4 p-4 rounded-2xl border text-sm font-bold"></div>
+
+        <!-- Worksheet Content -->
+        <div class="p-6 md:p-8" dir="ltr">
+          <!-- Decorative Heart Garland from Worksheet -->
+          <div class="flex items-center gap-2 mb-3 text-rose-500 text-lg select-none">
+            <span>❤️〰️💖〰️❤️〰️💗〰️❤️〰️💖</span>
+          </div>
+
+          <h3 class="en-font text-2xl md:text-3xl font-black text-slate-900 mb-4">choose the correct answer.</h3>
+
+          <!-- Drag & Drop Word Bank Box -->
+          <div class="max-w-3xl mx-auto mb-8 p-5 rounded-2xl border-2 border-emerald-400 bg-emerald-50/50 shadow-sm">
+            <div class="text-xs font-bold text-emerald-800 text-center mb-3" dir="rtl">صندوق الكلمات (اسحب الكلمة وأفلتها في الفراغ المناسب):</div>
+            <div id="q5-word-bank" class="flex flex-wrap items-center justify-center gap-3 md:gap-4">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- 5 Sentences List with Illustrations -->
+          <div id="q5-sentences-list" class="space-y-5 max-w-4xl mx-auto">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Question Footer Navigation -->
+        <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <button onclick="goToQuestion(4)" class="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-sm transition">
+              ➡️ السؤال السابق
+            </button>
+            <button onclick="checkQuestion(5)" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm shadow transition">
+              تحقق من السؤال الخامس ✔️
+            </button>
+          </div>
+          <button onclick="finishExam()" class="px-7 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-base shadow-lg shadow-emerald-200 transition flex items-center gap-2">
+            <span>إنهاء الاختبار واعتماد النتيجة النهائية</span>
+            <span>🎓</span>
+          </button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==========================================
+       RESULTS, MOTIVATION & FEEDBACK MODAL
+       ========================================== -->
+  <div id="results-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto no-print">
+    <div class="bg-white rounded-3xl max-w-4xl w-full shadow-2xl border border-indigo-100 overflow-hidden my-8 max-h-[92vh] flex flex-col">
+      <!-- Modal Header -->
+      <div id="modal-header-bg" class="bg-gradient-to-r from-indigo-600 via-purple-600 to-sky-500 p-6 text-white text-center relative">
+        <button onclick="closeResultsModal()" class="absolute top-4 left-4 w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white font-bold text-lg transition">
+          ✕
+        </button>
+        <div id="modal-trophy" class="text-6xl mb-2 animate-bounce">🏆</div>
+        <h2 id="modal-title" class="text-2xl md:text-3xl font-black mb-1">أحسنت! بارك الله في جهودك</h2>
+        <p id="modal-subtitle" class="text-indigo-100 font-semibold text-sm md:text-base">تقرير النتيجة النهائية والتغذية الراجعة التفصيلية</p>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="p-6 overflow-y-auto space-y-6 flex-1">
+        <!-- Score Summary Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+          <div class="bg-indigo-50 rounded-2xl p-4 border border-indigo-100">
+            <p class="text-xs font-bold text-indigo-500 mb-1">الدرجة الكلية</p>
+            <p id="modal-total-score" class="text-2xl md:text-3xl font-black text-indigo-950">43 / 43</p>
+          </div>
+          <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
+            <p class="text-xs font-bold text-emerald-600 mb-1">النسبة المئوية</p>
+            <p id="modal-percentage" class="text-2xl md:text-3xl font-black text-emerald-700">100%</p>
+          </div>
+          <div class="bg-amber-50 rounded-2xl p-4 border border-amber-100">
+            <p class="text-xs font-bold text-amber-600 mb-1">التقدير والنجوم</p>
+            <p id="modal-stars" class="text-xl md:text-2xl font-black text-amber-500">⭐⭐⭐⭐⭐</p>
+          </div>
+          <div class="bg-sky-50 rounded-2xl p-4 border border-sky-100">
+            <p class="text-xs font-bold text-sky-600 mb-1">اسم الطالب/ـة</p>
+            <p id="modal-student-name" class="text-base md:text-lg font-black text-sky-950 truncate">بطل المستقبل</p>
+          </div>
+        </div>
+
+        <!-- Motivational Box -->
+        <div id="modal-motivation-box" class="p-5 rounded-2xl bg-gradient-to-r from-amber-50 via-yellow-50 to-emerald-50 border-2 border-amber-200 flex items-center gap-4">
+          <div class="text-4xl shrink-0" id="modal-motivation-icon">🌟</div>
+          <div>
+            <h3 class="font-black text-amber-950 text-base md:text-lg mb-1" id="modal-motivation-heading">رسالة تحفيزية</h3>
+            <p class="text-slate-700 font-semibold text-sm leading-relaxed" id="modal-motivation-text"></p>
+          </div>
+        </div>
+
+        <!-- Breakdown by Question -->
+        <div>
+          <h3 class="font-black text-indigo-950 text-lg mb-3 flex items-center gap-2">
+            <span>📊</span>
+            <span>تفصيل الدرجات حسب الأسئلة الخمسة:</span>
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3" id="modal-questions-breakdown">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Detailed Feedback Table -->
+        <div>
+          <h3 class="font-black text-indigo-950 text-lg mb-3 flex items-center gap-2">
+            <span>📝</span>
+            <span>التغذية الراجعة ومراجعة الإجابات التفصيلية:</span>
+          </h3>
+          <div id="modal-detailed-feedback" class="space-y-4">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer Actions -->
+      <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="printExamResult()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition flex items-center gap-2">
+            <span>🖨️</span>
+            <span>طباعة النتيجة والتقرير</span>
+          </button>
+          <button onclick="reviewOnBoard()" class="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm shadow-md transition flex items-center gap-2">
+            <span>🔍</span>
+            <span>مراجعة الإجابات على لوحة الاختبار</span>
+          </button>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="resetAllExam(); closeResultsModal();" class="px-4 py-2.5 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold text-sm transition">
+            🔄 إعادة المحاولة
+          </button>
+          <button onclick="closeResultsModal()" class="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-sm transition">
+            إغلاق
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       PRINTABLE REPORT & CERTIFICATE VIEW
+       ========================================== -->
+  <div id="printable-report" class="hidden print-only p-6 max-w-5xl mx-auto">
+    <div class="border-4 border-indigo-700 rounded-3xl p-6 space-y-5">
+      <!-- Print Header -->
+      <div class="flex items-center justify-between border-b-2 border-indigo-100 pb-4">
+        <div>
+          <h1 class="text-2xl font-black text-indigo-950">تقرير وشهادة نتيجة الاختبار التفاعلي للغة الإنجليزية</h1>
+          <p class="text-sm font-bold text-slate-600">Interactive English Assessment Report & Feedback</p>
+        </div>
+        <div class="text-left text-xs font-bold text-slate-600">
+          <div id="print-date"></div>
+          <div class="text-indigo-700 font-black text-sm mt-1">درجة الاختبار النهائية</div>
+        </div>
+      </div>
+
+      <!-- Student & Score Box -->
+      <div class="grid grid-cols-4 gap-3 text-center bg-slate-50 p-4 rounded-2xl border border-slate-200">
+        <div>
+          <div class="text-xs font-bold text-slate-500">اسم الطالب/ـة</div>
+          <div id="print-student-name" class="text-base font-black text-slate-900 mt-1">غير محدد</div>
+        </div>
+        <div>
+          <div class="text-xs font-bold text-slate-500">المجموع الكلي</div>
+          <div id="print-total-score" class="text-xl font-black text-indigo-700 mt-1">43 / 43</div>
+        </div>
+        <div>
+          <div class="text-xs font-bold text-slate-500">النسبة المئوية</div>
+          <div id="print-percentage" class="text-xl font-black text-emerald-700 mt-1">100%</div>
+        </div>
+        <div>
+          <div class="text-xs font-bold text-slate-500">التقدير العام</div>
+          <div id="print-grade" class="text-base font-black text-amber-600 mt-1">ممتاز ⭐⭐⭐⭐⭐</div>
+        </div>
+      </div>
+
+      <!-- Motivational Message in Print -->
+      <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-center">
+        <p id="print-motivation" class="text-sm font-bold text-amber-950"></p>
+      </div>
+
+      <!-- Questions Summary Table -->
+      <div id="print-questions-summary" class="grid grid-cols-5 gap-2 text-center"></div>
+
+      <!-- Detailed Answers Table -->
+      <div id="print-detailed-tables" class="space-y-4 text-xs"></div>
+
+      <div class="pt-4 border-t border-slate-200 flex justify-between text-xs font-bold text-slate-500">
+        <span>تم استخراج التقرير آلياً من نظام الاختبار التفاعلي للغة الإنجليزية</span>
+        <span>مع تمنياتنا بدوام التفوق والنجاح 🌟</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       JAVASCRIPT LOGIC & ILLUSTRATIONS
+       ========================================== -->
+  <script>
+    /**************************************************************
+     * 1. HIGH-QUALITY CUSTOM SVG ILLUSTRATIONS (MATCHING WORKSHEETS)
+     **************************************************************/
+    function renderOrdinalNumberGraphic(num, suffix, color) {
+      return `
+        <div class="en-font inline-flex items-start justify-center select-none leading-none py-2" style="color: ${color}">
+          <span class="text-6xl md:text-7xl font-black tracking-tighter">${num}</span>
+          <span class="text-lg md:text-xl font-black uppercase mt-1 ml-0.5">${suffix}</span>
+        </div>
+      `;
+    }
+
+    const SVG_ILLUSTRATIONS = {
+      // Q4_1: Running Cheetah (fast)
+      fast: `
+        <svg viewBox="0 0 160 100" class="w-36 h-28 mx-auto drop-shadow-sm">
+          <!-- Speed lines -->
+          <line x1="6" y1="35" x2="28" y2="35" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>
+          <line x1="2" y1="52" x2="20" y2="52" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>
+          <!-- Tail -->
+          <path d="M36 48 Q16 42 10 52" fill="none" stroke="#d97706" stroke-width="6" stroke-linecap="round"/>
+          <!-- Back legs stretching -->
+          <path d="M44 54 L20 76" stroke="#f59e0b" stroke-width="7" stroke-linecap="round"/>
+          <path d="M54 56 L34 80" stroke="#d97706" stroke-width="6" stroke-linecap="round"/>
+          <!-- Front legs leaping forward -->
+          <path d="M112 52 L144 68" stroke="#d97706" stroke-width="6" stroke-linecap="round"/>
+          <path d="M118 48 L150 56" stroke="#f59e0b" stroke-width="7" stroke-linecap="round"/>
+          <!-- Sleek Cheetah Body -->
+          <path d="M36 46 Q78 34 120 46 Q100 62 42 56 Z" fill="#fbbf24" stroke="#b45309" stroke-width="2"/>
+          <!-- Head & Neck -->
+          <path d="M114 44 L132 32" stroke="#fbbf24" stroke-width="11" stroke-linecap="round"/>
+          <circle cx="136" cy="30" r="10" fill="#fbbf24" stroke="#b45309" stroke-width="2"/>
+          <circle cx="130" cy="22" r="3.5" fill="#b45309"/>
+          <circle cx="140" cy="28" r="2" fill="#1e293b"/>
+          <circle cx="145" cy="31" r="2" fill="#451a03"/>
+          <!-- Cheetah Spots -->
+          <g fill="#451a03">
+            <circle cx="52" cy="46" r="2.2"/><circle cx="62" cy="44" r="2.5"/><circle cx="72" cy="48" r="2.2"/>
+            <circle cx="82" cy="43" r="2.5"/><circle cx="92" cy="47" r="2.2"/><circle cx="102" cy="44" r="2.4"/>
+            <circle cx="68" cy="52" r="2"/><circle cx="88" cy="52" r="2"/><circle cx="110" cy="48" r="2.2"/>
+          </g>
+        </svg>
+      `,
+      // Q4_2: Hand pinching tiny miniature briefcase (small)
+      small: `
+        <svg viewBox="0 0 140 120" class="w-32 h-28 mx-auto drop-shadow-sm">
+          <!-- Hand coming from top-right -->
+          <path d="M118 12 L78 14 Q56 18 44 40 L38 56 Q36 62 42 62 L52 46 L56 64 Q58 70 64 66 L68 50 L82 62 Q88 64 90 58 L84 44 L102 36 Z" fill="#fdba74" stroke="#ea580c" stroke-width="1.8"/>
+          <!-- Tiny Brown Briefcase held between fingers -->
+          <path d="M62 66 Q68 58 74 66" fill="none" stroke="#451a03" stroke-width="3" stroke-linecap="round"/>
+          <rect x="46" y="66" width="44" height="32" rx="5" fill="#78350f" stroke="#451a03" stroke-width="2"/>
+          <rect x="50" y="70" width="36" height="24" rx="3" fill="#92400e" stroke="#b45309" stroke-width="1"/>
+          <rect x="65" y="79" width="6" height="6" rx="1" fill="#fbbf24"/>
+        </svg>
+      `,
+      // Q4_3: Colorful Blue/Purple Butterfly (beautiful)
+      beautiful: `
+        <svg viewBox="0 0 130 120" class="w-28 h-28 mx-auto drop-shadow-sm">
+          <!-- Upper Left Wing -->
+          <path d="M64 58 C48 16, 12 18, 20 52 C24 64, 46 66, 64 58 Z" fill="#818cf8" stroke="#4338ca" stroke-width="2.2"/>
+          <circle cx="36" cy="40" r="8" fill="#c7d2fe" opacity="0.8"/>
+          <circle cx="28" cy="50" r="4" fill="#f472b6"/>
+          <!-- Upper Right Wing -->
+          <path d="M66 58 C82 16, 118 18, 110 52 C106 64, 84 66, 66 58 Z" fill="#818cf8" stroke="#4338ca" stroke-width="2.2"/>
+          <circle cx="94" cy="40" r="8" fill="#c7d2fe" opacity="0.8"/>
+          <circle cx="102" cy="50" r="4" fill="#f472b6"/>
+          <!-- Lower Left Wing -->
+          <path d="M64 62 C44 66, 24 88, 42 100 C54 106, 62 84, 64 62 Z" fill="#a78bfa" stroke="#4338ca" stroke-width="2.2"/>
+          <circle cx="46" cy="86" r="5" fill="#ddd6fe"/>
+          <!-- Lower Right Wing -->
+          <path d="M66 62 C86 66, 106 88, 88 100 C76 106, 68 84, 66 62 Z" fill="#a78bfa" stroke="#4338ca" stroke-width="2.2"/>
+          <circle cx="84" cy="86" r="5" fill="#ddd6fe"/>
+          <!-- Body & Antennae -->
+          <path d="M63 36 Q54 22 48 24" fill="none" stroke="#1e1b4b" stroke-width="2" stroke-linecap="round"/>
+          <path d="M67 36 Q76 22 82 24" fill="none" stroke="#1e1b4b" stroke-width="2" stroke-linecap="round"/>
+          <ellipse cx="65" cy="60" rx="4" ry="22" fill="#312e81"/>
+        </svg>
+      `,
+      // Q4_4: Smart Girl with Glasses, Book & Lightbulb (intelligent)
+      intelligent: `
+        <svg viewBox="0 0 130 120" class="w-28 h-28 mx-auto drop-shadow-sm">
+          <!-- Glowing Lightbulb -->
+          <g transform="translate(82, 8)">
+            <line x1="14" y1="0" x2="14" y2="-5" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="28" y1="6" x2="32" y2="2" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="0" y1="6" x2="-4" y2="2" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="14" cy="14" r="9" fill="#fde047" stroke="#ca8a04" stroke-width="2"/>
+            <rect x="10" y="22" width="8" height="5" rx="1.5" fill="#94a3b8"/>
+          </g>
+          <!-- Teal Wavy Hair -->
+          <path d="M30 56 C24 24, 86 24, 80 56 C86 66, 80 76, 72 76 L38 76 C30 76, 24 66, 30 56 Z" fill="#14b8a6" stroke="#0f766e" stroke-width="2"/>
+          <!-- Face -->
+          <circle cx="55" cy="52" r="16" fill="#fed7aa" stroke="#c2410c" stroke-width="1.5"/>
+          <!-- Glasses -->
+          <circle cx="49" cy="50" r="5.5" fill="#ffffff" stroke="#1e293b" stroke-width="2"/>
+          <circle cx="62" cy="50" r="5.5" fill="#ffffff" stroke="#1e293b" stroke-width="2"/>
+          <line x1="54.5" y1="50" x2="56.5" y2="50" stroke="#1e293b" stroke-width="2"/>
+          <circle cx="49" cy="50" r="1.8" fill="#1e293b"/>
+          <circle cx="62" cy="50" r="1.8" fill="#1e293b"/>
+          <!-- Smile -->
+          <path d="M51 59 Q55 63 60 59" fill="none" stroke="#7c2d12" stroke-width="2" stroke-linecap="round"/>
+          <!-- Yellow Shirt -->
+          <path d="M32 104 L36 72 L74 72 L78 104 Z" fill="#fde047" stroke="#ca8a04" stroke-width="2"/>
+          <!-- Raised Hand Pointing Idea -->
+          <path d="M74 84 L86 60" stroke="#fed7aa" stroke-width="7" stroke-linecap="round"/>
+          <line x1="86" y1="60" x2="86" y2="48" stroke="#fed7aa" stroke-width="4" stroke-linecap="round"/>
+          <!-- Open Teal Book -->
+          <path d="M26 86 L50 82 L50 106 L26 102 Z" fill="#2dd4bf" stroke="#115e59" stroke-width="2"/>
+          <path d="M50 82 L72 86 L72 102 L50 106 Z" fill="#5eead4" stroke="#115e59" stroke-width="2"/>
+        </svg>
+      `,
+      // Q4_5: Red Warning Sign with Black Exclamation Mark (dangerous)
+      dangerous: `
+        <svg viewBox="0 0 120 120" class="w-28 h-28 mx-auto drop-shadow-sm">
+          <path d="M55 18 Q60 9 65 18 L106 92 Q111 101 100 101 L20 101 Q9 101 14 92 Z" fill="#ef4444" stroke="#dc2626" stroke-width="3"/>
+          <polygon points="60,30 92,90 28,90" fill="#ffffff"/>
+          <rect x="56" y="46" width="8" height="24" rx="4" fill="#0f172a"/>
+          <circle cx="60" cy="80" r="4.5" fill="#0f172a"/>
+        </svg>
+      `,
+      // Q4_6: Brown Tortoise / Turtle (slow)
+      slow: `
+        <svg viewBox="0 0 150 110" class="w-32 h-28 mx-auto drop-shadow-sm">
+          <!-- Legs -->
+          <rect x="34" y="72" width="14" height="16" rx="5" fill="#d6b499" stroke="#a18072" stroke-width="2"/>
+          <rect x="56" y="74" width="14" height="15" rx="5" fill="#bfa084" stroke="#a18072" stroke-width="2"/>
+          <rect x="82" y="72" width="14" height="16" rx="5" fill="#d6b499" stroke="#a18072" stroke-width="2"/>
+          <rect x="98" y="74" width="13" height="14" rx="5" fill="#bfa084" stroke="#a18072" stroke-width="2"/>
+          <!-- Tail -->
+          <path d="M26 70 L14 74 L26 76 Z" fill="#f4a28c"/>
+          <!-- Head & Neck -->
+          <path d="M108 66 Q128 46 138 56 Q144 66 134 74 L108 74 Z" fill="#d6b499" stroke="#a18072" stroke-width="2"/>
+          <circle cx="132" cy="58" r="2.5" fill="#1e293b"/>
+          <path d="M132 68 Q137 70 140 67" fill="none" stroke="#78350f" stroke-width="2" stroke-linecap="round"/>
+          <!-- Dome Shell -->
+          <path d="M24 72 C24 30, 112 30, 112 72 Z" fill="#b45309" stroke="#78350f" stroke-width="2.5"/>
+          <line x1="30" y1="56" x2="106" y2="56" stroke="#78350f" stroke-width="2.5"/>
+          <line x1="68" y1="38" x2="68" y2="72" stroke="#78350f" stroke-width="2.5"/>
+          <line x1="48" y1="43" x2="48" y2="72" stroke="#78350f" stroke-width="2.5"/>
+          <line x1="88" y1="43" x2="88" y2="72" stroke="#78350f" stroke-width="2.5"/>
+        </svg>
+      `,
+      // Q4_7: Grey Elephant (Big)
+      Big: `
+        <svg viewBox="0 0 150 120" class="w-32 h-28 mx-auto drop-shadow-sm">
+          <!-- Tail -->
+          <path d="M26 62 L16 78" stroke="#64748b" stroke-width="3" stroke-linecap="round"/>
+          <!-- Back & Front Legs -->
+          <rect x="32" y="72" width="15" height="30" rx="4" fill="#94a3b8" stroke="#64748b" stroke-width="2"/>
+          <rect x="50" y="74" width="14" height="28" rx="4" fill="#64748b"/>
+          <rect x="78" y="72" width="15" height="30" rx="4" fill="#94a3b8" stroke="#64748b" stroke-width="2"/>
+          <rect x="94" y="74" width="14" height="28" rx="4" fill="#64748b"/>
+          <!-- Body -->
+          <ellipse cx="64" cy="62" rx="40" ry="26" fill="#94a3b8" stroke="#64748b" stroke-width="2"/>
+          <!-- Head & Trunk -->
+          <circle cx="104" cy="52" r="20" fill="#94a3b8" stroke="#64748b" stroke-width="2"/>
+          <path d="M118 54 C124 72, 118 92, 130 92 C136 92, 136 84, 132 82" fill="none" stroke="#94a3b8" stroke-width="10" stroke-linecap="round"/>
+          <!-- Big Ear -->
+          <ellipse cx="90" cy="52" rx="14" ry="18" fill="#64748b" stroke="#475569" stroke-width="2"/>
+          <!-- Eye & Tusk -->
+          <circle cx="112" cy="48" r="2.2" fill="#0f172a"/>
+          <path d="M112 62 Q122 68 128 62" fill="none" stroke="#f8fafc" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      `,
+      // Q4_8: Famous Football Player in White Jersey Celebrating (popular)
+      popular: `
+        <svg viewBox="0 0 130 120" class="w-28 h-28 mx-auto drop-shadow-sm">
+          <!-- Stadium Crowd Background -->
+          <rect x="16" y="10" width="98" height="100" rx="12" fill="#1e293b"/>
+          <g fill="#475569" opacity="0.7">
+            <circle cx="30" cy="26" r="4"/><circle cx="46" cy="22" r="4"/><circle cx="88" cy="24" r="4"/><circle cx="102" cy="30" r="4"/>
+            <circle cx="26" cy="48" r="4"/><circle cx="98" cy="52" r="4"/><circle cx="34" cy="70" r="4"/>
+          </g>
+          <!-- Stadium Spotlights -->
+          <circle cx="32" cy="18" r="3" fill="#fde047"/>
+          <circle cx="98" cy="18" r="3" fill="#fde047"/>
+          <!-- Player Head & Hair -->
+          <path d="M52 30 Q65 20 78 30 L76 42 L54 42 Z" fill="#0f172a"/>
+          <circle cx="65" cy="42" r="13" fill="#fed7aa" stroke="#c2410c" stroke-width="1.5"/>
+          <circle cx="60" cy="40" r="1.8" fill="#0f172a"/>
+          <circle cx="70" cy="40" r="1.8" fill="#0f172a"/>
+          <path d="M60 47 Q65 51 70 47" fill="none" stroke="#7c2d12" stroke-width="2" stroke-linecap="round"/>
+          <!-- White Real Madrid Style Jersey -->
+          <path d="M36 110 L42 60 Q65 56 88 60 L94 110 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+          <text x="65" y="88" text-anchor="middle" font-size="9" font-weight="bold" fill="#1e293b" font-family="sans-serif">EMIRATES</text>
+          <circle cx="75" cy="70" r="3.5" fill="#f59e0b"/>
+          <!-- Hand over Chest Celebration -->
+          <path d="M88 66 L66 76" stroke="#ffffff" stroke-width="9" stroke-linecap="round"/>
+          <circle cx="63" cy="76" r="5" fill="#fed7aa"/>
+        </svg>
+      `,
+      // Q4_9: Long Wavy Hair (long)
+      long: `
+        <svg viewBox="0 0 120 120" class="w-28 h-28 mx-auto drop-shadow-sm">
+          <!-- Flowing Long Wavy Blonde/Light-Brown Hair Silhouette -->
+          <path d="M60 14
+                   C34 14, 24 38, 28 62
+                   C32 82, 22 96, 34 108
+                   C42 104, 46 92, 44 78
+                   C40 56, 46 34, 60 32
+                   C74 34, 80 56, 76 78
+                   C74 92, 78 104, 86 108
+                   C98 96, 88 82, 92 62
+                   C96 38, 86 14, 60 14 Z"
+                fill="#d6b48c" stroke="#9c7a54" stroke-width="2.2"/>
+          <!-- Hair Strands Detail -->
+          <path d="M46 22 C34 44, 38 72, 34 98" fill="none" stroke="#9c7a54" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M74 22 C86 44, 82 72, 86 98" fill="none" stroke="#9c7a54" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      `,
+
+      // Q5 Side Illustrations
+      // Q5_1: Princess with very long golden hair
+      q5_hair: `
+        <svg viewBox="0 0 90 110" class="w-20 h-24 shrink-0">
+          <!-- Long Golden Hair -->
+          <path d="M45 10 C26 10, 22 45, 24 96 C26 104, 44 104, 48 96 C38 80, 38 40, 45 28 C58 28, 62 48, 56 68 L64 68 C68 44, 64 10, 45 10 Z" fill="#facc15" stroke="#ca8a04" stroke-width="1.8"/>
+          <!-- Face -->
+          <circle cx="46" cy="24" r="10" fill="#ffedd5"/>
+          <circle cx="43" cy="23" r="1.5" fill="#1e293b"/>
+          <circle cx="49" cy="23" r="1.5" fill="#1e293b"/>
+          <path d="M44 28 Q46 30 48 28" fill="none" stroke="#e11d48" stroke-width="1.5"/>
+          <!-- Pink Dress -->
+          <path d="M36 36 L56 36 L64 94 L32 94 Z" fill="#f472b6" stroke="#db2777" stroke-width="1.5"/>
+        </svg>
+      `,
+      // Q5_2: Blue Bag & Red Bag
+      q5_bags: `
+        <svg viewBox="0 0 120 70" class="w-28 h-16 shrink-0">
+          <!-- Blue Backpack -->
+          <g transform="translate(8, 8)">
+            <path d="M16 8 Q22 0 28 8" fill="none" stroke="#1e3a8a" stroke-width="3"/>
+            <rect x="6" y="8" width="32" height="42" rx="10" fill="#1d4ed8" stroke="#1e3a8a" stroke-width="2"/>
+            <rect x="11" y="26" width="22" height="18" rx="4" fill="#2563eb" stroke="#93c5fd" stroke-width="1.2"/>
+          </g>
+          <!-- Red Backpack -->
+          <g transform="translate(64, 8)">
+            <path d="M16 8 Q22 0 28 8" fill="none" stroke="#991b1b" stroke-width="3"/>
+            <rect x="6" y="8" width="32" height="42" rx="10" fill="#ef4444" stroke="#991b1b" stroke-width="2"/>
+            <rect x="11" y="26" width="22" height="18" rx="4" fill="#dc2626" stroke="#fca5a5" stroke-width="1.2"/>
+          </g>
+        </svg>
+      `,
+      // Q5_3: Snail, White Rabbit & Green Turtle
+      q5_rabbit_group: `
+        <svg viewBox="0 0 180 75" class="w-40 h-16 shrink-0">
+          <!-- Snail -->
+          <g transform="translate(4, 22)">
+            <path d="M6 38 Q26 40 44 36 Q48 30 44 22 Q40 28 34 32 L10 32 Z" fill="#bef264" stroke="#65a30d" stroke-width="1.5"/>
+            <circle cx="24" cy="22" r="13" fill="#b45309" stroke="#78350f" stroke-width="1.8"/>
+            <path d="M24 22 m-7 0 a 7 7 0 1 0 14 0 a 5 5 0 1 0 -10 0" fill="none" stroke="#fde68a" stroke-width="2"/>
+          </g>
+          <!-- White Rabbit -->
+          <g transform="translate(62, 6)">
+            <ellipse cx="18" cy="14" rx="4" ry="12" transform="rotate(-15 18 14)" fill="#ffffff" stroke="#94a3b8" stroke-width="1.8"/>
+            <ellipse cx="32" cy="14" rx="4" ry="12" transform="rotate(15 32 14)" fill="#ffffff" stroke="#94a3b8" stroke-width="1.8"/>
+            <ellipse cx="28" cy="46" rx="18" ry="14" fill="#ffffff" stroke="#94a3b8" stroke-width="1.8"/>
+            <circle cx="24" cy="32" r="12" fill="#ffffff" stroke="#94a3b8" stroke-width="1.8"/>
+            <circle cx="20" cy="30" r="2" fill="#1e293b"/>
+            <circle cx="28" cy="30" r="2" fill="#1e293b"/>
+            <circle cx="24" cy="34" r="2" fill="#f472b6"/>
+          </g>
+          <!-- Turtle -->
+          <g transform="translate(122, 16)">
+            <circle cx="10" cy="24" r="8" fill="#4ade80" stroke="#15803d" stroke-width="1.8"/>
+            <circle cx="8" cy="22" r="1.5" fill="#0f172a"/>
+            <path d="M16 36 C16 12, 52 12, 52 36 Z" fill="#b45309" stroke="#78350f" stroke-width="2"/>
+            <rect x="20" y="36" width="7" height="10" rx="2" fill="#4ade80" stroke="#15803d" stroke-width="1.5"/>
+            <rect x="38" y="36" width="7" height="10" rx="2" fill="#4ade80" stroke="#15803d" stroke-width="1.5"/>
+          </g>
+        </svg>
+      `,
+      // Q5_4: Butterfly & Bee
+      q5_butterfly_bee: `
+        <svg viewBox="0 0 150 75" class="w-36 h-16 shrink-0">
+          <!-- Butterfly -->
+          <g transform="translate(10, 6)">
+            <path d="M28 30 C12 4, 0 14, 10 32 C4 44, 14 58, 28 36 Z" fill="#f472b6" stroke="#be185d" stroke-width="1.8"/>
+            <path d="M30 30 C46 4, 58 14, 48 32 C54 44, 44 58, 30 36 Z" fill="#38bdf8" stroke="#0369a1" stroke-width="1.8"/>
+            <ellipse cx="29" cy="32" rx="2.5" ry="14" fill="#1e293b"/>
+          </g>
+          <!-- Cute Bee -->
+          <g transform="translate(82, 12)">
+            <ellipse cx="24" cy="14" rx="8" ry="10" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+            <ellipse cx="34" cy="14" rx="8" ry="10" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+            <ellipse cx="26" cy="30" rx="18" ry="13" fill="#facc15" stroke="#0f172a" stroke-width="2"/>
+            <line x1="22" y1="18" x2="22" y2="42" stroke="#0f172a" stroke-width="4"/>
+            <line x1="32" y1="19" x2="32" y2="41" stroke="#0f172a" stroke-width="4"/>
+            <circle cx="14" cy="27" r="2" fill="#0f172a"/>
+          </g>
+        </svg>
+      `,
+      // Q5_5: Snail, Turtle & Cat
+      q5_snail_group: `
+        <svg viewBox="0 0 180 75" class="w-40 h-16 shrink-0">
+          <!-- Snail -->
+          <g transform="translate(4, 22)">
+            <path d="M6 38 Q26 40 44 36 Q48 30 44 22 Q40 28 34 32 L10 32 Z" fill="#bef264" stroke="#65a30d" stroke-width="1.5"/>
+            <circle cx="24" cy="22" r="13" fill="#b45309" stroke="#78350f" stroke-width="1.8"/>
+            <path d="M24 22 m-7 0 a 7 7 0 1 0 14 0" fill="none" stroke="#fde68a" stroke-width="2"/>
+          </g>
+          <!-- Turtle -->
+          <g transform="translate(60, 18)">
+            <circle cx="10" cy="24" r="8" fill="#4ade80" stroke="#15803d" stroke-width="1.8"/>
+            <path d="M16 36 C16 12, 52 12, 52 36 Z" fill="#b45309" stroke="#78350f" stroke-width="2"/>
+            <rect x="20" y="36" width="7" height="10" rx="2" fill="#4ade80" stroke="#15803d" stroke-width="1.5"/>
+            <rect x="38" y="36" width="7" height="10" rx="2" fill="#4ade80" stroke="#15803d" stroke-width="1.5"/>
+          </g>
+          <!-- Cat -->
+          <g transform="translate(124, 6)">
+            <polygon points="14,18 18,4 26,14" fill="#fb923c" stroke="#7c2d12" stroke-width="1.8"/>
+            <polygon points="38,18 34,4 26,14" fill="#fb923c" stroke="#7c2d12" stroke-width="1.8"/>
+            <ellipse cx="26" cy="48" rx="14" ry="18" fill="#ffffff" stroke="#7c2d12" stroke-width="1.8"/>
+            <circle cx="26" cy="24" r="12" fill="#ffffff" stroke="#7c2d12" stroke-width="1.8"/>
+            <circle cx="22" cy="22" r="1.8" fill="#0f172a"/>
+            <circle cx="30" cy="22" r="1.8" fill="#0f172a"/>
+            <polygon points="24,26 28,26 26,29" fill="#f43f5e"/>
+          </g>
+        </svg>
+      `
+    };
+
+    /**************************************************************
+     * 2. EXAM DATA STRUCTURE (5 QUESTIONS FROM THE 5 WORKSHEETS)
+     **************************************************************/
+    const EXAM_DATA = {
+      // Question 1: Ordinal numbers 1st - 12th (12 items)
+      q1: {
+        wordBank: [
+          'Ninth', 'Eleventh', 'Eighth', 'Sixth',
+          'Tenth', 'Second', 'Fourth', 'Fifth',
+          'Third', 'Seventh', 'Twelfth', 'First'
+        ],
+        items: [
+          { id: 1,  num: '1',  suffix: 'ST', color: '#e05d4e', correctWord: 'First',    ar: 'الأول' },
+          { id: 2,  num: '2',  suffix: 'ND', color: '#ec6da5', correctWord: 'Second',   ar: 'الثاني' },
+          { id: 3,  num: '3',  suffix: 'RD', color: '#ba79d6', correctWord: 'Third',    ar: 'الثالث' },
+          { id: 4,  num: '4',  suffix: 'TH', color: '#7e62cf', correctWord: 'Fourth',   ar: 'الرابع' },
+          { id: 5,  num: '5',  suffix: 'TH', color: '#3396ab', correctWord: 'Fifth',    ar: 'الخامس' },
+          { id: 6,  num: '6',  suffix: 'TH', color: '#6cb4c7', correctWord: 'Sixth',    ar: 'السادس' },
+          { id: 7,  num: '7',  suffix: 'TH', color: '#6477c9', correctWord: 'Seventh',  ar: 'السابع' },
+          { id: 8,  num: '8',  suffix: 'TH', color: '#3268b8', correctWord: 'Eighth',   ar: 'الثامن' },
+          { id: 9,  num: '9',  suffix: 'TH', color: '#4ca977', correctWord: 'Ninth',    ar: 'التاسع' },
+          { id: 10, num: '10', suffix: 'TH', color: '#77ba63', correctWord: 'Tenth',    ar: 'العاشر' },
+          { id: 11, num: '11', suffix: 'TH', color: '#fbbd56', correctWord: 'Eleventh', ar: 'الحادي عشر' },
+          { id: 12, num: '12', suffix: 'TH', color: '#fd9047', correctWord: 'Twelfth',  ar: 'الثاني عشر' }
+        ]
+      },
+
+      // Question 2: Ordinal numbers 13th - 20th (8 items)
+      q2: {
+        wordBank: [
+          'Twentieth', 'Eighteenth', 'Fifteenth', 'Fourteenth',
+          'Seventeenth', 'Thirteenth', 'Sixteenth', 'Nineteenth'
+        ],
+        items: [
+          { id: 1, num: '13', suffix: 'TH', color: '#e05d53', correctWord: 'Thirteenth',  ar: 'الثالث عشر' },
+          { id: 2, num: '14', suffix: 'TH', color: '#fbbd56', correctWord: 'Fourteenth',  ar: 'الرابع عشر' },
+          { id: 3, num: '15', suffix: 'TH', color: '#fd8e47', correctWord: 'Fifteenth',   ar: 'الخامس عشر' },
+          { id: 4, num: '16', suffix: 'TH', color: '#8a64d6', correctWord: 'Sixteenth',   ar: 'السادس عشر' },
+          { id: 5, num: '17', suffix: 'TH', color: '#3599b2', correctWord: 'Seventeenth', ar: 'السابع عشر' },
+          { id: 6, num: '18', suffix: 'TH', color: '#6cb4c7', correctWord: 'Eighteenth',  ar: 'الثامن عشر' },
+          { id: 7, num: '19', suffix: 'TH', color: '#6477c9', correctWord: 'Nineteenth',  ar: 'التاسع عشر' },
+          { id: 8, num: '20', suffix: 'TH', color: '#3268b8', correctWord: 'Twentieth',   ar: 'العشرون' }
+        ]
+      },
+
+      // Question 3: Circle the correct words to name the numbers (9 items)
+      q3: [
+        { id: 1, number: '11th', options: ['eleventh', 'eleven'],     correct: 'eleventh',   ar: 'الحادي عشر' },
+        { id: 2, number: '3rd',  options: ['three', 'third'],         correct: 'third',      ar: 'الثالث' },
+        { id: 3, number: '20th', options: ['twentieth', 'twenty'],    correct: 'twentieth',  ar: 'العشرون' },
+        { id: 4, number: '2nd',  options: ['second', 'two'],          correct: 'second',     ar: 'الثاني' },
+        { id: 5, number: '1st',  options: ['one', 'first'],           correct: 'first',      ar: 'الأول' },
+        { id: 6, number: '18th', options: ['eighteen', 'eighteenth'], correct: 'eighteenth', ar: 'الثامن عشر' },
+        { id: 7, number: '15th', options: ['fifteenth', 'fifteen'],   correct: 'fifteenth',  ar: 'الخامس عشر' },
+        { id: 8, number: '13th', options: ['thirteen', 'thirteenth'], correct: 'thirteenth', ar: 'الثالث عشر' },
+        { id: 9, number: '7th',  options: ['seven', 'seventh'],       correct: 'seventh',    ar: 'السابع' }
+      ],
+
+      // Question 4: Choose and write the correct answer under the 9 pictures
+      q4: {
+        wordBank: [
+          'Big', 'small', 'fast', 'slow', 'long',
+          'dangerous', 'beautiful', 'intelligent', 'popular'
+        ],
+        items: [
+          { id: 1, svgKey: 'fast',        correctWord: 'fast',        ar: 'سريع (الفهد)' },
+          { id: 2, svgKey: 'small',       correctWord: 'small',       ar: 'صغير (حقيبة صغيرة جداً)' },
+          { id: 3, svgKey: 'beautiful',   correctWord: 'beautiful',   ar: 'جميل (الفراشة)' },
+          { id: 4, svgKey: 'intelligent', correctWord: 'intelligent', ar: 'ذكي (الفتاة القارئة)' },
+          { id: 5, svgKey: 'dangerous',   correctWord: 'dangerous',   ar: 'خطير (علامة التحذير)' },
+          { id: 6, svgKey: 'slow',        correctWord: 'slow',        ar: 'بطيء (السلحفاة)' },
+          { id: 7, svgKey: 'Big',         correctWord: 'Big',         ar: 'كبير (الفيل)' },
+          { id: 8, svgKey: 'popular',     correctWord: 'popular',     ar: 'مشهور / محبوب (لاعب الكرة)' },
+          { id: 9, svgKey: 'long',        correctWord: 'long',        ar: 'طويل (الشعر الطويل)' }
+        ]
+      },
+
+      // Question 5: Complete the blank using the drag & drop word box (5 sentences)
+      q5: {
+        wordBank: ['better', 'longer', 'smallest', 'fastest', 'more beautiful'],
+        items: [
+          {
+            id: 1,
+            prefix: '1- Her hair is',
+            suffix: 'than my hair.',
+            correctWord: 'longer',
+            svgKey: 'q5_hair',
+            ar: 'شعرها أطول من شعري'
+          },
+          {
+            id: 2,
+            prefix: '2- The red bag is good, but the blue bag is',
+            suffix: 'than the red bag.',
+            correctWord: 'better',
+            svgKey: 'q5_bags',
+            ar: 'الحقيبة الحمراء جيدة، لكن الحقيبة الزرقاء أفضل من الحمراء'
+          },
+          {
+            id: 3,
+            prefix: '3- A rabbit is the',
+            suffix: '.',
+            correctWord: 'fastest',
+            svgKey: 'q5_rabbit_group',
+            ar: 'الأرنب هو الأسرع'
+          },
+          {
+            id: 4,
+            prefix: '4- butterflies are',
+            suffix: 'than bees.',
+            correctWord: 'more beautiful',
+            svgKey: 'q5_butterfly_bee',
+            ar: 'الفراشات أكثر جمالاً من النحل'
+          },
+          {
+            id: 5,
+            prefix: '5- The snail is the',
+            suffix: '.',
+            correctWord: 'smallest',
+            svgKey: 'q5_snail_group',
+            ar: 'الحلزون هو الأصغر'
+          }
+        ]
+      }
+    };
+
+    /**************************************************************
+     * 3. STATE MANAGEMENT
+     **************************************************************/
+    let currentQuestion = 1;
+    let showAllMode = false;
+    let soundEnabled = true;
+    let examFinished = false;
+
+    const userState = {
+      q1: { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '', 9: '', 10: '', 11: '', 12: '' },
+      q2: { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '' },
+      q3: { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '', 9: '' },
+      q4: { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '', 9: '' },
+      q5: { 1: '', 2: '', 3: '', 4: '', 5: '' },
+      checked: { 1: false, 2: false, 3: false, 4: false, 5: false }
+    };
+
+    // Active word selection for tap/click placement
+    let selectedQ1Word = null;
+    let selectedQ2Word = null;
+    let selectedQ4Word = null;
+    let selectedQ5Word = null;
+
+    /**************************************************************
+     * 4. SOUND EFFECTS & SPEECH SYNTHESIS
+     **************************************************************/
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function playTone(type) {
+      if (!soundEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new AudioCtx();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'click') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(520, now);
+          osc.frequency.exponentialRampToValueAtTime(680, now + 0.08);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === 'connect') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.exponentialRampToValueAtTime(740, now + 0.14);
+          gain.gain.setValueAtTime(0.16, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+          osc.start(now);
+          osc.stop(now + 0.14);
+        } else if (type === 'correct') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.1);
+          osc.frequency.setValueAtTime(783.99, now + 0.2);
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.38);
+          osc.start(now);
+          osc.stop(now + 0.38);
+        } else if (type === 'wrong') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(240, now);
+          osc.frequency.linearRampToValueAtTime(170, now + 0.25);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        } else if (type === 'fanfare') {
+          const notes = [523.25, 659.25, 783.99, 1046.5];
+          notes.forEach((freq, idx) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.type = 'triangle';
+            o.frequency.setValueAtTime(freq, now + idx * 0.12);
+            g.gain.setValueAtTime(0.18, now + idx * 0.12);
+            g.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.12 + 0.3);
+            o.start(now + idx * 0.12);
+            o.stop(now + idx * 0.12 + 0.3);
+          });
+        }
+      } catch (e) {
+        // Ignore audio errors
+      }
+    }
+
+    function speakWord(word) {
+      if (!soundEnabled || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+
+      // تعديل النطق الصوتي لكلمة Sixth لتُنطق "سكث" (sikth) بشكل واضح وصحيح
+      const phoneticMap = {
+        'sixth': 'sikth'
+      };
+      const cleanKey = String(word).trim().toLowerCase();
+      const textToSpeak = phoneticMap[cleanKey] || String(word).replace(/\bsixth\b/gi, 'sikth');
+
+      const utter = new SpeechSynthesisUtterance(textToSpeak);
+      utter.lang = 'en-US';
+      utter.rate = 0.85;
+      window.speechSynthesis.speak(utter);
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('sound-icon').textContent = soundEnabled ? '🔊' : '🔇';
+    }
+
+    /**************************************************************
+     * 5. INITIALIZATION & RENDERING
+     **************************************************************/
+    window.addEventListener('DOMContentLoaded', () => {
+      renderQuestion1();
+      renderQuestion2();
+      renderQuestion3();
+      renderQuestion4();
+      renderQuestion5();
+      updateDashboard();
+    });
+
+    function onZoneDragOver(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('drag-over');
+    }
+
+    function onZoneDragLeave(e) {
+      e.currentTarget.classList.remove('drag-over');
+    }
+
+    /**************************************************************
+     * 6. QUESTION 1: ORDINAL NUMBERS 1ST - 12TH (12 ITEMS)
+     **************************************************************/
+    function renderQuestion1() {
+      const bankEl = document.getElementById('q1-word-bank');
+      const gridEl = document.getElementById('q1-grid');
+      const usedWords = Object.values(userState.q1).filter(Boolean);
+
+      bankEl.innerHTML = EXAM_DATA.q1.wordBank.map(word => {
+        const isUsed = usedWords.includes(word);
+        const isSelected = selectedQ1Word === word;
+        return `
+          <div draggable="${!isUsed}"
+               ondragstart="onWordDragStart(event, '${word}')"
+               onclick="onQ1WordClick('${word}', ${isUsed})"
+               class="word-chip en-font py-2 px-3 rounded-xl font-bold text-base md:text-lg border select-none
+               ${isUsed
+                 ? 'bg-slate-100 text-slate-300 border-slate-200 line-through cursor-not-allowed'
+                 : isSelected
+                   ? 'selected-chip shadow-md'
+                   : 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-indigo-50 hover:border-indigo-300'}">
+            ${word}
+          </div>
+        `;
+      }).join('');
+
+      gridEl.innerHTML = EXAM_DATA.q1.items.map(item => {
+        const placedWord = userState.q1[item.id] || '';
+        const isCorrect = placedWord.toLowerCase() === item.correctWord.toLowerCase();
+
+        let boxStyle = 'border-slate-700 bg-white hover:border-indigo-500';
+        let feedbackHtml = '';
+
+        if (userState.checked[1]) {
+          if (isCorrect) {
+            boxStyle = 'border-emerald-600 bg-emerald-50 text-emerald-800';
+            feedbackHtml = `<div class="mt-1 text-xs font-bold text-emerald-700" dir="rtl">✅ إجابة صحيحة</div>`;
+          } else {
+            boxStyle = 'border-rose-600 bg-rose-50 text-rose-800';
+            feedbackHtml = `<div class="mt-1 text-xs font-bold text-rose-700" dir="rtl">❌ الصحيح: <span class="en-font underline">${item.correctWord}</span></div>`;
+          }
+        } else if (placedWord) {
+          boxStyle = 'border-indigo-600 bg-indigo-50/70 text-indigo-950';
+        }
+
+        return `
+          <div class="p-4 border border-slate-300 flex flex-col items-center justify-between bg-white relative">
+            <button type="button"
+                    onclick="speakWord('${item.correctWord}')"
+                    class="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-slate-100 hover:bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs transition"
+                    title="استمع للنطق">
+              🔊
+            </button>
+
+            <div class="my-1">
+              ${renderOrdinalNumberGraphic(item.num, item.suffix, item.color)}
+            </div>
+
+            <div class="w-full max-w-[190px] mt-2">
+              <div ondragover="onZoneDragOver(event)"
+                   ondragleave="onZoneDragLeave(event)"
+                   ondrop="onQ1Drop(event, ${item.id})"
+                   onclick="onQ1SlotClick(${item.id})"
+                   class="drop-zone w-full px-3 py-2 rounded-md border-2 flex items-center justify-between cursor-pointer ${boxStyle}">
+                <span></span>
+                ${placedWord
+                  ? `<span onclick="if(!selectedQ1Word){ event.stopPropagation(); speakWord('${placedWord}'); }" class="en-font text-base md:text-lg font-extrabold hover:underline" title="اضغط لسماع النطق">${placedWord}</span>
+                     <span onclick="event.stopPropagation(); removeQ1Word(${item.id});" class="text-xs text-rose-500 hover:text-rose-700 font-bold px-1" title="إزالة">✕</span>`
+                  : `<span class="text-xs font-semibold text-slate-400" dir="rtl">ضع الكلمة هنا</span><span></span>`
+                }
+              </div>
+              <div class="text-center min-h-[20px]">${feedbackHtml}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function onWordDragStart(e, word) {
+      e.dataTransfer.setData('text/plain', word);
+      speakWord(word);
+    }
+
+    function onQ1WordClick(word, isUsed) {
+      if (isUsed) return;
+      playTone('click');
+      speakWord(word);
+      selectedQ1Word = (selectedQ1Word === word) ? null : word;
+      renderQuestion1();
+    }
+
+    function removeQ1Word(slotId) {
+      userState.q1[slotId] = '';
+      userState.checked[1] = false;
+      document.getElementById('q1-feedback').classList.add('hidden');
+      playTone('click');
+      renderQuestion1();
+      updateDashboard();
+    }
+
+    function onQ1SlotClick(slotId) {
+      if (selectedQ1Word) {
+        Object.keys(userState.q1).forEach(k => {
+          if (userState.q1[k] === selectedQ1Word) userState.q1[k] = '';
+        });
+        userState.q1[slotId] = selectedQ1Word;
+        speakWord(selectedQ1Word);
+        selectedQ1Word = null;
+        userState.checked[1] = false;
+        document.getElementById('q1-feedback').classList.add('hidden');
+        playTone('connect');
+        renderQuestion1();
+        updateDashboard();
+      } else if (userState.q1[slotId]) {
+        speakWord(userState.q1[slotId]);
+      }
+    }
+
+    function onQ1Drop(e, slotId) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      const word = e.dataTransfer.getData('text/plain');
+      if (!word || !EXAM_DATA.q1.wordBank.includes(word)) return;
+      Object.keys(userState.q1).forEach(k => {
+        if (userState.q1[k] === word) userState.q1[k] = '';
+      });
+      userState.q1[slotId] = word;
+      selectedQ1Word = null;
+      userState.checked[1] = false;
+      document.getElementById('q1-feedback').classList.add('hidden');
+      playTone('connect');
+      renderQuestion1();
+      updateDashboard();
+    }
+
+    function clearQ1() {
+      Object.keys(userState.q1).forEach(k => userState.q1[k] = '');
+      selectedQ1Word = null;
+      userState.checked[1] = false;
+      document.getElementById('q1-feedback').classList.add('hidden');
+      playTone('click');
+      renderQuestion1();
+      updateDashboard();
+    }
+
+    /**************************************************************
+     * 7. QUESTION 2: ORDINAL NUMBERS 13TH - 20TH (8 ITEMS)
+     **************************************************************/
+    function renderQuestion2() {
+      const bankEl = document.getElementById('q2-word-bank');
+      const gridEl = document.getElementById('q2-grid');
+      const usedWords = Object.values(userState.q2).filter(Boolean);
+
+      bankEl.innerHTML = EXAM_DATA.q2.wordBank.map(word => {
+        const isUsed = usedWords.includes(word);
+        const isSelected = selectedQ2Word === word;
+        return `
+          <div draggable="${!isUsed}"
+               ondragstart="onWordDragStart(event, '${word}')"
+               onclick="onQ2WordClick('${word}', ${isUsed})"
+               class="word-chip en-font py-2 px-3 rounded-xl font-bold text-base md:text-lg border select-none
+               ${isUsed
+                 ? 'bg-slate-100 text-slate-300 border-slate-200 line-through cursor-not-allowed'
+                 : isSelected
+                   ? 'selected-chip shadow-md'
+                   : 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-sky-50 hover:border-sky-300'}">
+            ${word}
+          </div>
+        `;
+      }).join('');
+
+      const cellsHtml = EXAM_DATA.q2.items.map(item => {
+        const placedWord = userState.q2[item.id] || '';
+        const isCorrect = placedWord.toLowerCase() === item.correctWord.toLowerCase();
+
+        let boxStyle = 'border-slate-700 bg-white hover:border-sky-500';
+        let feedbackHtml = '';
+
+        if (userState.checked[2]) {
+          if (isCorrect) {
+            boxStyle = 'border-emerald-600 bg-emerald-50 text-emerald-800';
+            feedbackHtml = `<div class="mt-1 text-xs font-bold text-emerald-700" dir="rtl">✅ إجابة صحيحة</div>`;
+          } else {
+            boxStyle = 'border-rose-600 bg-rose-50 text-rose-800';
+            feedbackHtml = `<div class="mt-1 text-xs font-bold text-rose-700" dir="rtl">❌ الصحيح: <span class="en-font underline">${item.correctWord}</span></div>`;
+          }
+        } else if (placedWord) {
+          boxStyle = 'border-sky-600 bg-sky-50/70 text-sky-950';
+        }
+
+        return `
+          <div class="p-4 border border-slate-300 flex flex-col items-center justify-between bg-white relative">
+            <button type="button"
+                    onclick="speakWord('${item.correctWord}')"
+                    class="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-slate-100 hover:bg-sky-100 text-sky-600 flex items-center justify-center text-xs transition"
+                    title="استمع للنطق">
+              🔊
+            </button>
+
+            <div class="my-1">
+              ${renderOrdinalNumberGraphic(item.num, item.suffix, item.color)}
+            </div>
+
+            <div class="w-full max-w-[190px] mt-2">
+              <div ondragover="onZoneDragOver(event)"
+                   ondragleave="onZoneDragLeave(event)"
+                   ondrop="onQ2Drop(event, ${item.id})"
+                   onclick="onQ2SlotClick(${item.id})"
+                   class="drop-zone w-full px-3 py-2 rounded-md border-2 flex items-center justify-between cursor-pointer ${boxStyle}">
+                <span></span>
+                ${placedWord
+                  ? `<span class="en-font text-base md:text-lg font-extrabold">${placedWord}</span>
+                     <span class="text-xs text-rose-500 font-bold" title="إزالة">✕</span>`
+                  : `<span class="text-xs font-semibold text-slate-400" dir="rtl">ضع الكلمة هنا</span><span></span>`
+                }
+              </div>
+              <div class="text-center min-h-[20px]">${feedbackHtml}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // 9th decorative cell to complete the 3x3 worksheet grid
+      const ninthCell = `
+        <div class="hidden sm:flex p-4 border border-slate-300 items-center justify-center bg-slate-50/50">
+          <span class="text-3xl opacity-30">⭐</span>
+        </div>
+      `;
+
+      gridEl.innerHTML = cellsHtml + ninthCell;
+    }
+
+    function onQ2WordClick(word, isUsed) {
+      if (isUsed) return;
+      playTone('click');
+      speakWord(word);
+      selectedQ2Word = (selectedQ2Word === word) ? null : word;
+      renderQuestion2();
+    }
+
+    function onQ2SlotClick(slotId) {
+      if (selectedQ2Word) {
+        Object.keys(userState.q2).forEach(k => {
+          if (userState.q2[k] === selectedQ2Word) userState.q2[k] = '';
+        });
+        userState.q2[slotId] = selectedQ2Word;
+        selectedQ2Word = null;
+        userState.checked[2] = false;
+        document.getElementById('q2-feedback').classList.add('hidden');
+        playTone('connect');
+        renderQuestion2();
+        updateDashboard();
+      } else if (userState.q2[slotId]) {
+        userState.q2[slotId] = '';
+        userState.checked[2] = false;
+        document.getElementById('q2-feedback').classList.add('hidden');
+        playTone('click');
+        renderQuestion2();
+        updateDashboard();
+      }
+    }
+
+    function onQ2Drop(e, slotId) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      const word = e.dataTransfer.getData('text/plain');
+      if (!word || !EXAM_DATA.q2.wordBank.includes(word)) return;
+      Object.keys(userState.q2).forEach(k => {
+        if (userState.q2[k] === word) userState.q2[k] = '';
+      });
+      userState.q2[slotId] = word;
+      selectedQ2Word = null;
+      userState.checked[2] = false;
+      document.getElementById('q2-feedback').classList.add('hidden');
+      playTone('connect');
+      renderQuestion2();
+      updateDashboard();
+    }
+
+    function clearQ2() {
+      Object.keys(userState.q2).forEach(k => userState.q2[k] = '');
+      selectedQ2Word = null;
+      userState.checked[2] = false;
+      document.getElementById('q2-feedback').classList.add('hidden');
+      playTone('click');
+      renderQuestion2();
+      updateDashboard();
+    }
+
+    /**************************************************************
+     * 8. QUESTION 3: CIRCLE THE CORRECT WORDS (9 ITEMS)
+     **************************************************************/
+    function renderQuestion3() {
+      const container = document.getElementById('q3-rows-container');
+      container.innerHTML = EXAM_DATA.q3.map(item => {
+        const chosen = userState.q3[item.id] || '';
+        const isCorrect = chosen === item.correct;
+
+        let rowBorder = 'border-slate-800 bg-white';
+        let statusNote = '';
+
+        if (userState.checked[3]) {
+          if (isCorrect) {
+            rowBorder = 'border-emerald-600 bg-emerald-50/30';
+            statusNote = `<span class="text-xs font-bold text-emerald-700" dir="rtl">✅ إجابة صحيحة</span>`;
+          } else {
+            rowBorder = 'border-rose-600 bg-rose-50/30';
+            statusNote = `<span class="text-xs font-bold text-rose-700" dir="rtl">❌ الصحيح: <span class="en-font underline">${item.correct}</span></span>`;
+          }
+        }
+
+        const optionsHtml = item.options.map(opt => {
+          const isSelected = chosen === opt;
+          let circleClass = '';
+          if (userState.checked[3]) {
+            if (isSelected && isCorrect) circleClass = 'circled-correct';
+            else if (isSelected && !isCorrect) circleClass = 'circled-wrong';
+            else if (opt === item.correct) circleClass = 'border-dashed !border-emerald-500 text-emerald-700';
+          } else if (isSelected) {
+            circleClass = 'circled';
+          }
+
+          return `
+            <button type="button"
+                    onclick="onQ3SelectOption(${item.id}, '${opt}')"
+                    class="circle-option en-font text-lg md:text-xl font-bold text-slate-800 ${circleClass}">
+              ${opt}
+            </button>
+          `;
+        }).join('');
+
+        return `
+          <div class="border-2 ${rowBorder} rounded-xl px-5 py-3 flex flex-wrap items-center justify-between gap-4 shadow-sm transition">
+            <div class="flex items-center gap-3 min-w-[110px]">
+              <span class="en-font text-2xl font-black text-slate-900">${item.number}</span>
+              <button type="button"
+                      onclick="speakWord('${item.correct}')"
+                      class="w-7 h-7 rounded-full bg-violet-100 hover:bg-violet-200 text-violet-700 flex items-center justify-center text-xs transition"
+                      title="استمع للنطق">
+                🔊
+              </button>
+            </div>
+
+            <div class="flex-1 flex items-center justify-around max-w-lg mx-auto gap-4">
+              ${optionsHtml}
+            </div>
+
+            <div class="min-w-[120px] text-right">
+              ${statusNote}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function onQ3SelectOption(rowId, opt) {
+      playTone('connect');
+      speakWord(opt);
+      userState.q3[rowId] = (userState.q3[rowId] === opt) ? '' : opt;
+      userState.checked[3] = false;
+      document.getElementById('q3-feedback').classList.add('hidden');
+      renderQuestion3();
+      updateDashboard();
+    }
+
+    function clearQ3() {
+      Object.keys(userState.q3).forEach(k => userState.q3[k] = '');
+      userState.checked[3] = false;
+      document.getElementById('q3-feedback').classList.add('hidden');
+      playTone('click');
+      renderQuestion3();
+      updateDashboard();
+    }
+
+    /**************************************************************
+     * 9. QUESTION 4: CHOOSE AND WRITE THE CORRECT ANSWER (9 PICTURES)
+     **************************************************************/
+    function renderQuestion4() {
+      const bankEl = document.getElementById('q4-word-bank');
+      const gridEl = document.getElementById('q4-pictures-grid');
+      const usedWords = Object.values(userState.q4).filter(Boolean);
+
+      bankEl.innerHTML = EXAM_DATA.q4.wordBank.map(word => {
+        const isUsed = usedWords.includes(word);
+        const isSelected = selectedQ4Word === word;
+        return `
+          <div draggable="${!isUsed}"
+               ondragstart="onWordDragStart(event, '${word}')"
+               onclick="onQ4WordClick('${word}', ${isUsed})"
+               class="word-chip en-font px-4 py-2 rounded-xl font-bold text-lg md:text-xl border select-none
+               ${isUsed
+                 ? 'bg-slate-100 text-slate-300 border-slate-200 line-through cursor-not-allowed'
+                 : isSelected
+                   ? 'selected-chip shadow-md'
+                   : 'bg-white text-slate-900 border-rose-200 hover:bg-rose-100/60 shadow-sm'}">
+            ${word}
+          </div>
+        `;
+      }).join('');
+
+      gridEl.innerHTML = EXAM_DATA.q4.items.map(item => {
+        const placedWord = userState.q4[item.id] || '';
+        const isCorrect = placedWord.toLowerCase() === item.correctWord.toLowerCase();
+
+        let zoneStyle = 'border-slate-300 bg-slate-50/70 hover:border-pink-400';
+        let feedbackBadge = '';
+
+        if (userState.checked[4]) {
+          if (isCorrect) {
+            zoneStyle = 'border-emerald-500 bg-emerald-50 text-emerald-800';
+            feedbackBadge = `<div class="mt-1.5 text-xs font-bold text-emerald-700 text-center" dir="rtl">✅ إجابة صحيحة</div>`;
+          } else {
+            zoneStyle = 'border-rose-500 bg-rose-50 text-rose-800';
+            feedbackBadge = `<div class="mt-1.5 text-xs font-bold text-rose-700 text-center" dir="rtl">❌ الصحيح: <span class="en-font underline">${item.correctWord}</span></div>`;
+          }
+        } else if (placedWord) {
+          zoneStyle = 'border-pink-500 bg-pink-50/80 text-pink-900';
+        }
+
+        return `
+          <div class="bg-white rounded-2xl p-4 border-2 border-slate-100 flex flex-col items-center justify-between shadow-sm hover:shadow-md transition">
+            <div class="w-full flex items-center justify-between mb-1">
+              <span class="text-xs font-bold text-slate-400">#${item.id}</span>
+              <button type="button"
+                      onclick="speakWord('${item.correctWord}')"
+                      class="w-7 h-7 rounded-full bg-pink-50 hover:bg-pink-100 text-pink-600 flex items-center justify-center text-xs transition"
+                      title="استمع للكلمة">
+                🔊
+              </button>
+            </div>
+
+            <div class="py-2 flex items-center justify-center">
+              ${SVG_ILLUSTRATIONS[item.svgKey]}
+            </div>
+
+            <div class="w-full mt-3">
+              <div ondragover="onZoneDragOver(event)"
+                   ondragleave="onZoneDragLeave(event)"
+                   ondrop="onQ4Drop(event, ${item.id})"
+                   onclick="onQ4SlotClick(${item.id})"
+                   class="drop-zone handwriting-lines w-full px-3 py-2 rounded-lg flex items-center justify-between cursor-pointer ${zoneStyle}">
+                <span class="w-4"></span>
+                ${placedWord
+                  ? `<span class="en-font text-lg font-extrabold tracking-wide z-10">${placedWord}</span>
+                     <span class="text-xs text-rose-500 hover:text-rose-700 font-bold px-1 z-10" title="إزالة">✕</span>`
+                  : `<span class="en-font text-slate-400 text-xs font-semibold z-10" dir="rtl">اضغط أو اسحب الكلمة هنا</span><span></span>`
+                }
+              </div>
+              ${feedbackBadge}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function onQ4WordClick(word, isUsed) {
+      if (isUsed) return;
+      playTone('click');
+      speakWord(word);
+      selectedQ4Word = (selectedQ4Word === word) ? null : word;
+      renderQuestion4();
+    }
+
+    function onQ4SlotClick(slotId) {
+      if (selectedQ4Word) {
+        Object.keys(userState.q4).forEach(k => {
+          if (userState.q4[k] === selectedQ4Word) userState.q4[k] = '';
+        });
+        userState.q4[slotId] = selectedQ4Word;
+        selectedQ4Word = null;
+        userState.checked[4] = false;
+        document.getElementById('q4-feedback').classList.add('hidden');
+        playTone('connect');
+        renderQuestion4();
+        updateDashboard();
+      } else if (userState.q4[slotId]) {
+        userState.q4[slotId] = '';
+        userState.checked[4] = false;
+        document.getElementById('q4-feedback').classList.add('hidden');
+        playTone('click');
+        renderQuestion4();
+        updateDashboard();
+      }
+    }
+
+    function onQ4Drop(e, slotId) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      const word = e.dataTransfer.getData('text/plain');
+      if (!word || !EXAM_DATA.q4.wordBank.includes(word)) return;
+      Object.keys(userState.q4).forEach(k => {
+        if (userState.q4[k] === word) userState.q4[k] = '';
+      });
+      userState.q4[slotId] = word;
+      selectedQ4Word = null;
+      userState.checked[4] = false;
+      document.getElementById('q4-feedback').classList.add('hidden');
+      playTone('connect');
+      renderQuestion4();
+      updateDashboard();
+    }
+
+    function clearQ4() {
+      Object.keys(userState.q4).forEach(k => userState.q4[k] = '');
+      selectedQ4Word = null;
+      userState.checked[4] = false;
+      document.getElementById('q4-feedback').classList.add('hidden');
+      playTone('click');
+      renderQuestion4();
+      updateDashboard();
+    }
+
+    /**************************************************************
+     * 10. QUESTION 5: FILL IN THE BLANKS WITH DRAG & DROP (5 ITEMS)
+     **************************************************************/
+    function renderQuestion5() {
+      const bankEl = document.getElementById('q5-word-bank');
+      const listEl = document.getElementById('q5-sentences-list');
+      const usedWords = Object.values(userState.q5).filter(Boolean);
+
+      bankEl.innerHTML = EXAM_DATA.q5.wordBank.map(word => {
+        const isUsed = usedWords.includes(word);
+        const isSelected = selectedQ5Word === word;
+        return `
+          <div draggable="${!isUsed}"
+               ondragstart="onWordDragStart(event, '${word}')"
+               onclick="onQ5WordClick('${word}', ${isUsed})"
+               class="word-chip en-font px-4 py-2 rounded-xl font-bold text-lg md:text-xl border-2 select-none
+               ${isUsed
+                 ? 'bg-slate-100 text-slate-300 border-slate-200 line-through cursor-not-allowed'
+                 : isSelected
+                   ? 'selected-chip shadow-md'
+                   : 'bg-white text-emerald-900 border-emerald-300 hover:bg-emerald-100 shadow-sm'}">
+            ${word}
+          </div>
+        `;
+      }).join('');
+
+      listEl.innerHTML = EXAM_DATA.q5.items.map(item => {
+        const placedWord = userState.q5[item.id] || '';
+        const isCorrect = placedWord.toLowerCase() === item.correctWord.toLowerCase();
+        const fullSentenceSpeech = `${item.prefix.replace(/^\d+-\s*/, '')} ${item.correctWord} ${item.suffix}`;
+
+        let slotStyle = 'border-emerald-400 bg-emerald-50/50 text-emerald-950 hover:border-emerald-600';
+        let cardStyle = 'border-slate-200 bg-white';
+        let feedbackHtml = '';
+
+        if (userState.checked[5]) {
+          if (isCorrect) {
+            slotStyle = 'border-emerald-600 bg-emerald-100 text-emerald-900';
+            cardStyle = 'border-emerald-400 bg-emerald-50/20';
+            feedbackHtml = `<div class="mt-2 text-xs font-bold text-emerald-700" dir="rtl">✅ إجابة صحيحة (${item.ar})</div>`;
+          } else {
+            slotStyle = 'border-rose-500 bg-rose-100 text-rose-900';
+            cardStyle = 'border-rose-400 bg-rose-50/20';
+            feedbackHtml = `<div class="mt-2 text-xs font-bold text-rose-700" dir="rtl">❌ الإجابة الصحيحة: <span class="en-font underline font-black">${item.correctWord}</span> (${item.ar})</div>`;
+          }
+        } else if (placedWord) {
+          slotStyle = 'border-indigo-500 bg-indigo-50 text-indigo-950';
+        }
+
+        return `
+          <div class="p-4 md:p-5 rounded-2xl border-2 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 transition ${cardStyle}">
+            <div class="flex-1 w-full">
+              <div class="flex flex-wrap items-center gap-2 en-font text-lg md:text-xl font-bold text-slate-900 leading-relaxed">
+                <button type="button"
+                        onclick="speakWord('${fullSentenceSpeech.replace(/'/g, "\\'")}')"
+                        class="w-8 h-8 rounded-full bg-emerald-100 hover:bg-emerald-200 text-emerald-700 flex items-center justify-center text-xs transition shrink-0"
+                        title="استمع للجملة">
+                  🔊
+                </button>
+                <span>${item.prefix}</span>
+                <span ondragover="onZoneDragOver(event)"
+                      ondragleave="onZoneDragLeave(event)"
+                      ondrop="onQ5Drop(event, ${item.id})"
+                      onclick="onQ5SlotClick(${item.id})"
+                      class="drop-zone inline-flex items-center justify-center min-w-[165px] px-4 py-1.5 rounded-xl border-2 border-dashed cursor-pointer transition ${slotStyle}">
+                  ${placedWord
+                    ? `<span class="font-black">${placedWord}</span>
+                       <span class="ml-2 text-xs text-rose-500 font-bold" title="إزالة">✕</span>`
+                    : `<span class="text-xs font-semibold text-slate-400" dir="rtl">اسحب الكلمة هنا</span>`
+                  }
+                </span>
+                <span>${item.suffix}</span>
+              </div>
+              ${feedbackHtml}
+            </div>
+
+            <!-- Worksheet Side Illustration -->
+            <div class="shrink-0 flex items-center justify-center bg-slate-50/80 rounded-2xl p-2 border border-slate-100">
+              ${SVG_ILLUSTRATIONS[item.svgKey]}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function onQ5WordClick(word, isUsed) {
+      if (isUsed) return;
+      playTone('click');
+      speakWord(word);
+      selectedQ5Word = (selectedQ5Word === word) ? null : word;
+      renderQuestion5();
+    }
+
+    function onQ5SlotClick(slotId) {
+      if (selectedQ5Word) {
+        Object.keys(userState.q5).forEach(k => {
+          if (userState.q5[k] === selectedQ5Word) userState.q5[k] = '';
+        });
+        userState.q5[slotId] = selectedQ5Word;
+        selectedQ5Word = null;
+        userState.checked[5] = false;
+        document.getElementById('q5-feedback').classList.add('hidden');
+        playTone('connect');
+        renderQuestion5();
+        updateDashboard();
+      } else if (userState.q5[slotId]) {
+        userState.q5[slotId] = '';
+        userState.checked[5] = false;
+        document.getElementById('q5-feedback').classList.add('hidden');
+        playTone('click');
+        renderQuestion5();
+        updateDashboard();
+      }
+    }
+
+    function onQ5Drop(e, slotId) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      const word = e.dataTransfer.getData('text/plain');
+      if (!word || !EXAM_DATA.q5.wordBank.includes(word)) return;
+      Object.keys(userState.q5).forEach(k => {
+        if (userState.q5[k] === word) userState.q5[k] = '';
+      });
+      userState.q5[slotId] = word;
+      selectedQ5Word = null;
+      userState.checked[5] = false;
+      document.getElementById('q5-feedback').classList.add('hidden');
+      playTone('connect');
+      renderQuestion5();
+      updateDashboard();
+    }
+
+    function clearQ5() {
+      Object.keys(userState.q5).forEach(k => userState.q5[k] = '');
+      selectedQ5Word = null;
+      userState.checked[5] = false;
+      document.getElementById('q5-feedback').classList.add('hidden');
+      playTone('click');
+      renderQuestion5();
+      updateDashboard();
+    }
+
+    /**************************************************************
+     * 11. NAVIGATION, QUESTION BOARD & SCORING
+     **************************************************************/
+    function getQuestionProgress(qNum) {
+      if (qNum === 1) {
+        return { answered: Object.values(userState.q1).filter(Boolean).length, total: 12 };
+      } else if (qNum === 2) {
+        return { answered: Object.values(userState.q2).filter(Boolean).length, total: 8 };
+      } else if (qNum === 3) {
+        return { answered: Object.values(userState.q3).filter(Boolean).length, total: 9 };
+      } else if (qNum === 4) {
+        return { answered: Object.values(userState.q4).filter(Boolean).length, total: 9 };
+      } else {
+        return { answered: Object.values(userState.q5).filter(Boolean).length, total: 5 };
+      }
+    }
+
+    function calculateScores() {
+      // Q1 (out of 12)
+      let s1 = 0;
+      EXAM_DATA.q1.items.forEach(item => {
+        if ((userState.q1[item.id] || '').toLowerCase() === item.correctWord.toLowerCase()) s1++;
+      });
+
+      // Q2 (out of 8)
+      let s2 = 0;
+      EXAM_DATA.q2.items.forEach(item => {
+        if ((userState.q2[item.id] || '').toLowerCase() === item.correctWord.toLowerCase()) s2++;
+      });
+
+      // Q3 (out of 9)
+      let s3 = 0;
+      EXAM_DATA.q3.forEach(item => {
+        if (userState.q3[item.id] === item.correct) s3++;
+      });
+
+      // Q4 (out of 9)
+      let s4 = 0;
+      EXAM_DATA.q4.items.forEach(item => {
+        if ((userState.q4[item.id] || '').toLowerCase() === item.correctWord.toLowerCase()) s4++;
+      });
+
+      // Q5 (out of 5)
+      let s5 = 0;
+      EXAM_DATA.q5.items.forEach(item => {
+        if ((userState.q5[item.id] || '').toLowerCase() === item.correctWord.toLowerCase()) s5++;
+      });
+
+      const totalScore = s1 + s2 + s3 + s4 + s5;
+      const maxScore = 43;
+      const percentage = Math.round((totalScore / maxScore) * 100);
+
+      return { s1, s2, s3, s4, s5, totalScore, maxScore, percentage };
+    }
+
+    function updateDashboard() {
+      const qTitles = [
+        { num: 1, title: 'السؤال 1: الأعداد (1st - 12th)', icon: '1️⃣' },
+        { num: 2, title: 'السؤال 2: الأعداد (13th - 20th)', icon: '2️⃣' },
+        { num: 3, title: 'السؤال 3: ضع دائرة حول الصحيح', icon: '⭕' },
+        { num: 4, title: 'السؤال 4: الكلمة تحت الصورة', icon: '🖼️' },
+        { num: 5, title: 'السؤال 5: أكمل الفراغ بالسحب', icon: '🧲' }
+      ];
+
+      let totalAnswered = 0;
+      const navList = document.getElementById('question-nav-list');
+
+      navList.innerHTML = qTitles.map(q => {
+        const prog = getQuestionProgress(q.num);
+        totalAnswered += prog.answered;
+
+        const headerBadge = document.getElementById(`q${q.num}-badge`);
+        if (headerBadge) headerBadge.textContent = `${prog.answered} / ${prog.total}`;
+
+        const isCurrent = !showAllMode && currentQuestion === q.num;
+        const isComplete = prog.answered === prog.total;
+
+        let btnStyle = 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200';
+        let badgeStyle = 'bg-slate-200 text-slate-700';
+
+        if (isCurrent) {
+          btnStyle = 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-200';
+          badgeStyle = 'bg-white text-indigo-700';
+        } else if (isComplete) {
+          btnStyle = 'bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-emerald-200';
+          badgeStyle = 'bg-emerald-600 text-white';
+        }
+
+        return `
+          <button onclick="goToQuestion(${q.num})"
+                  class="w-full p-3 rounded-2xl border-2 transition flex items-center justify-between text-right ${btnStyle}">
+            <div class="flex items-center gap-2.5">
+              <span class="text-lg">${q.icon}</span>
+              <div>
+                <div class="text-xs md:text-sm font-extrabold">${q.title}</div>
+                <div class="text-[11px] opacity-80 font-semibold">
+                  ${isComplete ? 'مكتمل بالكامل ✓' : prog.answered > 0 ? 'قيد الحل...' : 'لم يبدأ بعد'}
+                </div>
+              </div>
+            </div>
+            <span class="text-xs font-black px-2.5 py-1 rounded-xl ${badgeStyle}">
+              ${prog.answered}/${prog.total}
+            </span>
+          </button>
+        `;
+      }).join('');
+
+      const overallPct = Math.round((totalAnswered / 43) * 100);
+      document.getElementById('overall-progress-badge').textContent = `${totalAnswered} / 43`;
+      document.getElementById('overall-progress-pct').textContent = `${overallPct}%`;
+      document.getElementById('overall-progress-bar').style.width = `${overallPct}%`;
+    }
+
+    function goToQuestion(qNum) {
+      currentQuestion = qNum;
+      if (showAllMode) {
+        document.getElementById(`q-section-${qNum}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        [1, 2, 3, 4, 5].forEach(n => {
+          const sec = document.getElementById(`q-section-${n}`);
+          if (n === qNum) sec.classList.remove('hidden');
+          else sec.classList.add('hidden');
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      playTone('click');
+      updateDashboard();
+    }
+
+    function toggleShowAllQuestions() {
+      showAllMode = !showAllMode;
+      const btnText = document.getElementById('view-mode-text');
+      if (showAllMode) {
+        [1, 2, 3, 4, 5].forEach(n => document.getElementById(`q-section-${n}`).classList.remove('hidden'));
+        btnText.textContent = 'عرض سؤال واحد فقط';
+      } else {
+        [1, 2, 3, 4, 5].forEach(n => {
+          const sec = document.getElementById(`q-section-${n}`);
+          if (n === currentQuestion) sec.classList.remove('hidden');
+          else sec.classList.add('hidden');
+        });
+        btnText.textContent = 'عرض جميع الأسئلة معاً';
+      }
+      updateDashboard();
+    }
+
+    function checkCurrentQuestion() {
+      checkQuestion(currentQuestion);
+    }
+
+    function checkQuestion(qNum) {
+      userState.checked[qNum] = true;
+      const scores = calculateScores();
+      const qScoreMap = {
+        1: [scores.s1, 12],
+        2: [scores.s2, 8],
+        3: [scores.s3, 9],
+        4: [scores.s4, 9],
+        5: [scores.s5, 5]
+      };
+      const [got, max] = qScoreMap[qNum];
+
+      const fbEl = document.getElementById(`q${qNum}-feedback`);
+      fbEl.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-300', 'text-emerald-900', 'bg-amber-50', 'border-amber-300', 'text-amber-900');
+
+      if (got === max) {
+        playTone('correct');
+        fbEl.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
+        fbEl.innerHTML = `🌟 <strong>تغذية راجعة:</strong> ممتاز جداً! جميع إجاباتك في هذا السؤال صحيحة (${got} من ${max}). بارك الله فيك!`;
+      } else {
+        playTone('wrong');
+        fbEl.classList.add('bg-amber-50', 'border-amber-300', 'text-amber-900');
+        fbEl.innerHTML = `💡 <strong>تغذية راجعة:</strong> حصلت على (${got} من ${max}) في هذا السؤال. تم توضيح الإجابات الصحيحة باللون الأخضر وتصحيح الأخطاء باللون الأحمر لتتمكن من مراجعتها.`;
+      }
+
+      if (qNum === 1) renderQuestion1();
+      if (qNum === 2) renderQuestion2();
+      if (qNum === 3) renderQuestion3();
+      if (qNum === 4) renderQuestion4();
+      if (qNum === 5) renderQuestion5();
+    }
+
+    /**************************************************************
+     * 12. FINISH EXAM, MOTIVATION, FEEDBACK & PRINTABLE REPORT
+     **************************************************************/
+    function getMotivationalData(pct) {
+      if (pct >= 90) {
+        return {
+          trophy: '🏆',
+          stars: '⭐⭐⭐⭐⭐',
+          grade: 'ممتاز ومتميز جداً',
+          heading: 'أداء مبهر! أنت بطل متألق في اللغة الإنجليزية 🌟',
+          message: 'ما شاء الله! لقد أظهرت إتقاناً رائعاً في كتابة وتمييز الأعداد الترتيبية من الأول إلى العشرين، ومعاني الصفات وصيغ المقارنة والتفضيل. استمر على هذا التفوق!'
+        };
+      } else if (pct >= 75) {
+        return {
+          trophy: '🥇',
+          stars: '⭐⭐⭐⭐',
+          grade: 'جيد جداً',
+          heading: 'عمل رائع جداً! خطوة واحدة نحو الدرجة الكاملة 👏',
+          message: 'أحسنت صنعاً! معظم إجاباتك صحيحة ودقيقة. راجع الملاحظات البسيطة في جدول التغذية الراجعة بالأسفل لتصل إلى 100% في المرة القادمة.'
+        };
+      } else if (pct >= 50) {
+        return {
+          trophy: '🥈',
+          stars: '⭐⭐⭐',
+          grade: 'جيد',
+          heading: 'محاولة طيبة! لديك أساس جيد ويمكنك تحقيق الأفضل 💪',
+          message: 'جهد مشكور! لقد أجبت على عدد جيد من الفقرات، ويمكنك الاستفادة من التغذية الراجعة المصورة والنطق الصوتي للكلمات لتقوية حفظك وإعادة المحاولة.'
+        };
+      } else {
+        return {
+          trophy: '🌱',
+          stars: '⭐⭐',
+          grade: 'يحتاج إلى مزيد من التدريب',
+          heading: 'لا تستسلم! كل محاولة تجعلك أقوى وأكثر معرفة 🚀',
+          message: 'التعلم رحلة ممتعة! استعرض الإجابات الصحيحة في التغذية الراجعة بالأسفل واستمع لنطق الكلمات بالضغط على زر السماعة، ثم أعد المحاولة وستلاحظ تحسناً كبيراً بإذن الله.'
+        };
+      }
+    }
+
+    function finishExam() {
+      examFinished = true;
+      userState.checked = { 1: true, 2: true, 3: true, 4: true, 5: true };
+
+      renderQuestion1();
+      renderQuestion2();
+      renderQuestion3();
+      renderQuestion4();
+      renderQuestion5();
+
+      const scores = calculateScores();
+      const mot = getMotivationalData(scores.percentage);
+      const studentName = document.getElementById('student-name').value.trim() || 'طالب متميز';
+
+      // Show sidebar summary card
+      const sidebarCard = document.getElementById('sidebar-result-card');
+      sidebarCard.classList.remove('hidden');
+      document.getElementById('sidebar-score-text').textContent = `${scores.totalScore} / ${scores.maxScore}`;
+      document.getElementById('sidebar-pct-text').textContent = `${scores.percentage}% - ${mot.grade}`;
+
+      // Populate Modal
+      document.getElementById('modal-trophy').textContent = mot.trophy;
+      document.getElementById('modal-title').textContent = mot.grade;
+      document.getElementById('modal-total-score').textContent = `${scores.totalScore} / ${scores.maxScore}`;
+      document.getElementById('modal-percentage').textContent = `${scores.percentage}%`;
+      document.getElementById('modal-stars').textContent = mot.stars;
+      document.getElementById('modal-student-name').textContent = studentName;
+      document.getElementById('modal-motivation-heading').textContent = mot.heading;
+      document.getElementById('modal-motivation-text').textContent = mot.message;
+
+      const breakdownItems = [
+        { num: 1, name: 'س1: الأعداد (1st-12th)', got: scores.s1, max: 12 },
+        { num: 2, name: 'س2: الأعداد (13th-20th)', got: scores.s2, max: 8 },
+        { num: 3, name: 'س3: حوط الكلمة الصحيحة', got: scores.s3, max: 9 },
+        { num: 4, name: 'س4: الصفات تحت الصور',   got: scores.s4, max: 9 },
+        { num: 5, name: 'س5: إكمال الفراغ',       got: scores.s5, max: 5 }
+      ];
+
+      document.getElementById('modal-questions-breakdown').innerHTML = breakdownItems.map(b => {
+        const full = b.got === b.max;
+        return `
+          <div class="p-3 rounded-2xl border-2 ${full ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200'}">
+            <div class="text-xs font-extrabold text-slate-600 mb-1">${b.name}</div>
+            <div class="flex items-center justify-between">
+              <span class="text-lg font-black ${full ? 'text-emerald-700' : 'text-indigo-900'}">${b.got} / ${b.max}</span>
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${full ? 'bg-emerald-200 text-emerald-900' : 'bg-amber-100 text-amber-800'}">
+                ${full ? 'مكتمل ✓' : 'راجع'}
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const detailedHtml = buildDetailedFeedbackHtml();
+      document.getElementById('modal-detailed-feedback').innerHTML = detailedHtml;
+
+      // Populate Printable View
+      const nowStr = new Date().toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
+      document.getElementById('print-date').textContent = `التاريخ: ${nowStr}`;
+      document.getElementById('print-student-name').textContent = studentName;
+      document.getElementById('print-total-score').textContent = `${scores.totalScore} / ${scores.maxScore}`;
+      document.getElementById('print-percentage').textContent = `${scores.percentage}%`;
+      document.getElementById('print-grade').textContent = `${mot.grade} ${mot.stars}`;
+      document.getElementById('print-motivation').textContent = `${mot.heading} — ${mot.message}`;
+
+      document.getElementById('print-questions-summary').innerHTML = breakdownItems.map(b => `
+        <div class="p-2 rounded-xl border border-slate-300 bg-white">
+          <div class="text-[11px] font-bold text-slate-600">${b.name}</div>
+          <div class="text-base font-black text-indigo-900 mt-1">${b.got} / ${b.max}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('print-detailed-tables').innerHTML = detailedHtml;
+
+      openResultsModal();
+      playTone('fanfare');
+      launchConfetti();
+    }
+
+    function buildDetailedFeedbackHtml() {
+      // Q1 rows
+      const q1Rows = EXAM_DATA.q1.items.map(item => {
+        const userAns = userState.q1[item.id] || 'فارغ';
+        const ok = userAns.toLowerCase() === item.correctWord.toLowerCase();
+        return `
+          <tr class="border-b border-slate-100 ${ok ? 'bg-emerald-50/40' : 'bg-rose-50/40'}">
+            <td class="py-1.5 px-2.5 font-bold"><span class="en-font">${item.num}${item.suffix.toLowerCase()}</span> (${item.ar})</td>
+            <td class="py-1.5 px-2.5 en-font font-bold text-center">${userAns}</td>
+            <td class="py-1.5 px-2.5 en-font font-bold text-center text-emerald-700">${item.correctWord}</td>
+            <td class="py-1.5 px-2.5 font-bold text-center">${ok ? '✅' : '❌'}</td>
+          </tr>
+        `;
+      }).join('');
+
+      // Q2 rows
+      const q2Rows = EXAM_DATA.q2.items.map(item => {
+        const userAns = userState.q2[item.id] || 'فارغ';
+        const ok = userAns.toLowerCase() === item.correctWord.toLowerCase();
+        return `
+          <tr class="border-b border-slate-100 ${ok ? 'bg-emerald-50/40' : 'bg-rose-50/40'}">
+            <td class="py-1.5 px-2.5 font-bold"><span class="en-font">${item.num}${item.suffix.toLowerCase()}</span> (${item.ar})</td>
+            <td class="py-1.5 px-2.5 en-font font-bold text-center">${userAns}</td>
+            <td class="py-1.5 px-2.5 en-font font-bold text-center text-emerald-700">${item.correctWord}</td>
+            <td class="py-1.5 px-2.5 font-bold text-center">${ok ? '✅' : '❌'}</td>
+          </tr>
+        `;
+      }).join('');
+
+      // Q3 rows
+      const q3Rows = EXAM_DATA.q3.map(item => {
+        const userAns = userState.q3[item.id] || 'لم يختر';
+        const ok = userAns === item.correct;
+        return `
+          <tr class="border-b border-slate-100 ${ok ? 'bg-emerald-50/40' : 'bg-rose-50/40'}">
+            <td class="py-1.5 px-2.5 font-bold"><span class="en-font">${item.number}</span> (${item.ar})</td>
+            <td class="py-1.5 px-2.5 en-font font-bold text-center">${userAns}</td>
+            <td class="py-1.5 px-2.5 en-font font-bold text-center text-emerald-700">${item.correct}</td>
+            <td class="py-1.5 px-2.5 font-bold text-center">${ok ? '✅' : '❌'}</td>
+          </tr>
+        `;
+      }).join('');
+
+      // Q4 rows
+      const q4Rows = EXAM_DATA.q4.items.map(item => {
+        const userAns = userState.q4[item.id] || 'فارغ';
+        const ok = userAns.toLowerCase() === item.correctWord.toLowerCase();
+        return `
+          <tr class="border-b border-slate-100 ${ok ? 'bg-emerald-50/40' : 'bg-rose-50/40'}">
+            <td class="py-1.5 px-2.5 font-bold">صورة ${item.id}: ${item.ar}</td>
+            <td class="py-1.5 px-2.5 en-font font-bold text-center">${userAns}</td>
+            <td class="py-1.5 px-2.5 en-font font-bold text-center text-emerald-700">${item.correctWord}</td>
+            <td class="py-1.5 px-2.5 font-bold text-center">${ok ? '✅' : '❌'}</td>
+          </tr>
+        `;
+      }).join('');
+
+      // Q5 rows
+      const q5Rows = EXAM_DATA.q5.items.map(item => {
+        const userAns = userState.q5[item.id] || 'فارغ';
+        const ok = userAns.toLowerCase() === item.correctWord.toLowerCase();
+        return `
+          <tr class="border-b border-slate-100 ${ok ? 'bg-emerald-50/40' : 'bg-rose-50/40'}">
+            <td class="py-1.5 px-2.5 en-font font-bold">${item.prefix} [ ... ] ${item.suffix}</td>
+            <td class="py-1.5 px-2.5 en-font font-bold text-center">${userAns}</td>
+            <td class="py-1.5 px-2.5 en-font font-bold text-center text-emerald-700">${item.correctWord}</td>
+            <td class="py-1.5 px-2.5 font-bold text-center">${ok ? '✅' : '❌'}</td>
+          </tr>
+        `;
+      }).join('');
+
+      return `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="border border-slate-200 rounded-2xl overflow-hidden">
+            <div class="bg-indigo-50 px-4 py-2 font-extrabold text-indigo-950 text-xs">السؤال الأول: الأعداد الترتيبية (1st - 12th)</div>
+            <table class="w-full text-right text-xs">
+              <thead class="bg-slate-100 text-slate-600">
+                <tr><th class="py-1.5 px-2.5">الرقم</th><th class="py-1.5 px-2.5 text-center">إجابتك</th><th class="py-1.5 px-2.5 text-center">الصواب</th><th class="py-1.5 px-2.5 text-center">التقييم</th></tr>
+              </thead>
+              <tbody>${q1Rows}</tbody>
+            </table>
+          </div>
+
+          <div class="border border-slate-200 rounded-2xl overflow-hidden">
+            <div class="bg-sky-50 px-4 py-2 font-extrabold text-sky-950 text-xs">السؤال الثاني: الأعداد الترتيبية (13th - 20th)</div>
+            <table class="w-full text-right text-xs">
+              <thead class="bg-slate-100 text-slate-600">
+                <tr><th class="py-1.5 px-2.5">الرقم</th><th class="py-1.5 px-2.5 text-center">إجابتك</th><th class="py-1.5 px-2.5 text-center">الصواب</th><th class="py-1.5 px-2.5 text-center">التقييم</th></tr>
+              </thead>
+              <tbody>${q2Rows}</tbody>
+            </table>
+          </div>
+
+          <div class="border border-slate-200 rounded-2xl overflow-hidden">
+            <div class="bg-violet-50 px-4 py-2 font-extrabold text-violet-950 text-xs">السؤال الثالث: ضع دائرة حول الكلمة الصحيحة</div>
+            <table class="w-full text-right text-xs">
+              <thead class="bg-slate-100 text-slate-600">
+                <tr><th class="py-1.5 px-2.5">الرقم</th><th class="py-1.5 px-2.5 text-center">إجابتك</th><th class="py-1.5 px-2.5 text-center">الصواب</th><th class="py-1.5 px-2.5 text-center">التقييم</th></tr>
+              </thead>
+              <tbody>${q3Rows}</tbody>
+            </table>
+          </div>
+
+          <div class="border border-slate-200 rounded-2xl overflow-hidden">
+            <div class="bg-pink-50 px-4 py-2 font-extrabold text-pink-950 text-xs">السؤال الرابع: وضع الصفة تحت الصورة المناسبة</div>
+            <table class="w-full text-right text-xs">
+              <thead class="bg-slate-100 text-slate-600">
+                <tr><th class="py-1.5 px-2.5">الصورة</th><th class="py-1.5 px-2.5 text-center">إجابتك</th><th class="py-1.5 px-2.5 text-center">الصواب</th><th class="py-1.5 px-2.5 text-center">التقييم</th></tr>
+              </thead>
+              <tbody>${q4Rows}</tbody>
+            </table>
+          </div>
+
+          <div class="md:col-span-2 border border-slate-200 rounded-2xl overflow-hidden">
+            <div class="bg-emerald-50 px-4 py-2 font-extrabold text-emerald-950 text-xs">السؤال الخامس: إكمال الفراغ بالسحب والإفلات</div>
+            <table class="w-full text-right text-xs">
+              <thead class="bg-slate-100 text-slate-600">
+                <tr><th class="py-1.5 px-2.5">الجملة</th><th class="py-1.5 px-2.5 text-center">إجابتك</th><th class="py-1.5 px-2.5 text-center">الإجابة الصحيحة</th><th class="py-1.5 px-2.5 text-center">التقييم</th></tr>
+              </thead>
+              <tbody>${q5Rows}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function openResultsModal() {
+      document.getElementById('results-modal').classList.remove('hidden');
+    }
+
+    function closeResultsModal() {
+      document.getElementById('results-modal').classList.add('hidden');
+    }
+
+    function reviewOnBoard() {
+      closeResultsModal();
+      if (!showAllMode) {
+        toggleShowAllQuestions();
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function printExamResult() {
+      if (!examFinished) {
+        finishExam();
+      }
+      window.print();
+    }
+
+    function resetAllExam() {
+      clearQ1();
+      clearQ2();
+      clearQ3();
+      clearQ4();
+      clearQ5();
+      userState.checked = { 1: false, 2: false, 3: false, 4: false, 5: false };
+      examFinished = false;
+
+      [1, 2, 3, 4, 5].forEach(n => {
+        document.getElementById(`q${n}-feedback`).classList.add('hidden');
+      });
+      document.getElementById('sidebar-result-card').classList.add('hidden');
+
+      goToQuestion(1);
+    }
+
+    /**************************************************************
+     * 13. CONFETTI CELEBRATION ANIMATION
+     **************************************************************/
+    function launchConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const pieces = [];
+      const colors = ['#4f46e5', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
+
+      for (let i = 0; i < 110; i++) {
+        pieces.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          w: Math.random() * 10 + 6,
+          h: Math.random() * 6 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vy: Math.random() * 3.5 + 2,
+          vx: (Math.random() - 0.5) * 2.5,
+          angle: Math.random() * 360,
+          vAngle: (Math.random() - 0.5) * 8
+        });
+      }
+
+      let frame = 0;
+      function animate() {
+        frame++;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pieces.forEach(p => {
+          p.y += p.vy;
+          p.x += p.vx;
+          p.angle += p.vAngle;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.angle * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        });
+        if (frame < 180) {
+          requestAnimationFrame(animate);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      animate();
+    }
+  </script>
+</body>
+</html>
